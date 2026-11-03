@@ -63,6 +63,34 @@ class GoldCalculator
     }
 
     /**
+     * Total net metal weight of the owner's own items, whatever their purity (so it is more than the pure gold).
+     * An item whose weight cannot be worked out is counted apart, never added as zero; held-for-others items are skipped.
+     *
+     * @param  iterable<Item>  $items
+     * @return array{net: string, incomplete: int}
+     */
+    public function totalNet(iterable $items): array
+    {
+        $total = '0';
+        $incomplete = 0;
+
+        foreach ($items as $item) {
+            if ($item->ownership !== 'own') {
+                continue;
+            }
+
+            $net = $this->netWeight($item);
+            if ($net->isComplete()) {
+                $total = bcadd($total, $net->value, self::SCALE);
+            } else {
+                $incomplete++;
+            }
+        }
+
+        return ['net' => $total, 'incomplete' => $incomplete];
+    }
+
+    /**
      * Totals over the owner's items. Held-for-others items are excluded from everything,
      * and items with missing data are counted apart instead of being added as zero.
      *

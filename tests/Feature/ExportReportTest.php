@@ -119,6 +119,7 @@ class ExportReportTest extends TestCase
         $report = app(SummaryReport::class)->build($this->user->id);
 
         $this->assertSame('104,49', $report->facts['Total emas murni (g)']); // 99.99 + 4.5
+        $this->assertSame('106,00', $report->facts['Total berat emas (g)']); // 100 g of bars + 6 g net of the ring
         $this->assertSame('3', $report->facts['Barang aktif']);
         $this->assertContains(['Batangan', '2', '99,99'], $this->rowsOf($report, 0));
         $this->assertContains(['Perhiasan', '1', '4,50'], $this->rowsOf($report, 0));

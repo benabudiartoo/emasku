@@ -5,9 +5,10 @@ namespace App\Services;
 use App\Models\Item;
 
 /**
- * The gram figures behind the summary charts. Only the owner's own items with complete data count; weights are summed
- * from unrounded values and rounded once (4 decimals) for display. Nothing is ever turned into zero: a kind or a
- * location without such an item simply has no row.
+ * The gram figures behind the summary charts. Only the owner's own items count. The per kind and per location charts
+ * are pure gold, so they need complete data (purity included); the growth chart is the total weight (net metal weight),
+ * which does not need the purity. Weights are summed from unrounded values and rounded once (4 decimals) for display.
+ * Nothing is ever turned into zero: a kind or a location without such an item simply has no row.
  */
 class SummaryCharts
 {
@@ -27,6 +28,7 @@ class SummaryCharts
     public function build(iterable $items): array
     {
         $complete = [];
+        $weighed = [];
         foreach ($items as $item) {
             if ($item->ownership !== 'own') {
                 continue;
@@ -35,12 +37,17 @@ class SummaryCharts
             if ($pure->isComplete()) {
                 $complete[] = ['item' => $item, 'pure' => $pure->value];
             }
+            // Total weight does not need the purity, so an item with an unknown purity still counts here.
+            $net = $this->calc->netWeight($item);
+            if ($net->isComplete()) {
+                $weighed[] = ['item' => $item, 'weight' => $net->value];
+            }
         }
 
         return [
             'by_kind' => $this->byKind($complete),
             'by_location' => $this->byLocation($complete),
-            'growth' => $this->growth($complete),
+            'growth' => $this->growth($weighed),
         ];
     }
 
@@ -88,14 +95,19 @@ class SummaryCharts
         return $rows;
     }
 
-    /** @param  list<array{item: Item, pure: string}>  $complete */
-    private function growth(array $complete): array
+    /**
+     * Cumulative TOTAL weight (net metal weight, whatever the purity) by ownership date, not only the pure gold.
+     * The key is still `cumulative_g`; it now holds the net weight.
+     *
+     * @param  list<array{item: Item, weight: string}>  $weighed
+     */
+    private function growth(array $weighed): array
     {
         $byDate = [];
         $undated = 0;
         $approximate = 0;
 
-        foreach ($complete as ['item' => $item, 'pure' => $pure]) {
+        foreach ($weighed as ['item' => $item, 'weight' => $pure]) {
             $date = $item->owned_since?->format('Y-m-d');
             if ($date === null) {
                 $undated++;

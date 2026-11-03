@@ -20,8 +20,11 @@ class SummaryController extends Controller
     {
         $items = Item::where('user_id', $request->user()->id)->with('units', 'location')->get();
         $summary = $this->calc->summarize($items);
+        $weight = $this->calc->totalNet($items);
 
         return Inertia::render('Ringkasan/Index', [
+            'net_weight_g' => GoldCalculator::round($weight['net'], 4),
+            'net_incomplete' => $weight['incomplete'],
             'charts' => app(SummaryCharts::class)->build($items),
             'has_any' => $items->isNotEmpty(),
             'active_count' => $summary['counted'],

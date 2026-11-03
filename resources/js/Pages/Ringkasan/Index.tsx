@@ -15,6 +15,8 @@ type Props = {
     bars: number;
     jewelry: number;
     pure_gold_g: string;
+    net_weight_g: string;
+    net_incomplete: number;
     complete: number;
     incomplete: { id: string; name: string; missing: string[] }[];
     today: string;
@@ -30,7 +32,7 @@ function ZakatState({ zakat }: { zakat: ZakatSummary | null }) {
     return <span className="text-muted">{zakat.outcome === 'below_nisab' ? 'Belum mencapai nisab' : 'Haul belum genap'}</span>;
 }
 
-export default function Index({ has_any, active_count, bars, jewelry, pure_gold_g, complete, incomplete, today, zakat, charts }: Props) {
+export default function Index({ has_any, active_count, bars, jewelry, pure_gold_g, net_weight_g, net_incomplete, complete, incomplete, today, zakat, charts }: Props) {
     const [pick, setPick] = useState(false);
 
     return (
@@ -94,6 +96,14 @@ export default function Index({ has_any, active_count, bars, jewelry, pure_gold_
                                     <span className="hidden text-sm text-muted sm:block">{bars} batangan · {jewelry} perhiasan</span>
                                     <CaretRight size={18} className="text-muted" aria-hidden />
                                 </Link>
+                            </li>
+                            <li className="px-4 py-3">
+                                <span className="block text-sm text-muted">Total berat emas</span>
+                                <span className="block text-lg font-semibold"><Secret>{gram(net_weight_g)}</Secret> g</span>
+                                <span className="mt-0.5 block text-xs leading-relaxed text-muted">
+                                    Berat bersih semua barang milik sendiri, tanpa batu dan tanpa melihat kadar. Total emas murni (di atas) lebih kecil bila ada barang di bawah 24 karat.
+                                    {net_incomplete > 0 && ` ${net_incomplete} barang belum bisa ditimbang datanya, jadi belum masuk.`}
+                                </span>
                             </li>
                             <li>
                                 <Link href="/zakat" className="flex min-h-14 items-center gap-3 px-4 py-3 transition-colors hover:bg-paper">

@@ -14,6 +14,7 @@ class SummaryReport
     {
         $items = Item::where('user_id', $userId)->with('units')->get();
         $summary = $this->calc->summarize($items);
+        $weight = $this->calc->totalNet($items);
 
         $owned = $items->where('ownership', 'own');
         $complete = $owned->filter(fn (Item $i) => $this->calc->pureGold($i)->isComplete());
@@ -36,6 +37,7 @@ class SummaryReport
                 'Tanggal' => Fmt::date(Fmt::today()),
                 'Barang aktif' => (string) $summary['counted'],
                 'Total emas murni (g)' => Fmt::gram(GoldCalculator::round($summary['pure_gold'], 4)),
+                'Total berat emas (g)' => Fmt::gram(GoldCalculator::round($weight['net'], 4)),
                 'Barang data kurang' => (string) $summary['incomplete'],
             ],
             sections: [
@@ -47,6 +49,7 @@ class SummaryReport
             ],
             notes: [
                 'Hanya barang milik sendiri yang dihitung. Barang titipan tidak ikut. Barang dengan data kurang tidak dihitung sebagai nol.',
+                'Total berat emas adalah berat bersih semua barang (tanpa batu) tanpa melihat kadar, jadi bisa lebih besar dari total emas murni.',
             ],
         );
     }

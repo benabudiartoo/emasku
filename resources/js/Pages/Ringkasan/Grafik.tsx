@@ -50,7 +50,7 @@ export default function Grafik({ charts }: { charts: SummaryChartsData }) {
     return (
         <section aria-labelledby="grafik-title" className="mt-10">
             <h2 id="grafik-title" className="text-lg font-semibold">Grafik</h2>
-            <p className="mt-1 text-sm text-muted">Hanya barang milik sendiri yang datanya lengkap. Barang titipan dan barang yang belum lengkap tidak ikut.</p>
+            <p className="mt-1 text-sm text-muted">Hanya barang milik sendiri; barang titipan tidak ikut. Grafik emas murni memerlukan data lengkap (termasuk kadar), sedangkan grafik pertumbuhan memakai berat bersih sehingga tidak butuh kadar.</p>
 
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
                 <ChartCard title="Emas murni per jenis" subtitle="Dalam gram">
@@ -61,7 +61,7 @@ export default function Grafik({ charts }: { charts: SummaryChartsData }) {
                     <BarList rows={charts.by_location.map((r) => ({ label: r.label, value: r.pure_gold_g }))} format={g} head={['Lokasi', 'Emas murni']} />
                 </ChartCard>
 
-                <ChartCard title="Pertumbuhan emas murni" subtitle="Total gram menurut tanggal dimiliki sejak">
+                <ChartCard title="Pertumbuhan total berat emas" subtitle="Total gram (berat bersih, bukan hanya emas murni) menurut tanggal dimiliki sejak">
                     {growth.points.length === 0 ? (
                         <p className="text-sm text-muted">Belum ada barang dengan tanggal dimiliki sejak, jadi pertumbuhan belum bisa digambar.</p>
                     ) : (

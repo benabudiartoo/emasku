@@ -49,8 +49,8 @@ export default function GrowthChart({ points, formatGram, formatDate }: { points
     const first = points[0];
     const last = points[points.length - 1];
     const summary = points.length === 1
-        ? `Emas murni ${formatGram(last.cumulative_g)} sejak ${formatDate(last.date)}.`
-        : `Emas murni naik dari ${formatGram(first.cumulative_g)} pada ${formatDate(first.date)} menjadi ${formatGram(last.cumulative_g)} pada ${formatDate(last.date)}.`;
+        ? `Total berat emas ${formatGram(last.cumulative_g)} sejak ${formatDate(last.date)}.`
+        : `Total berat emas naik dari ${formatGram(first.cumulative_g)} pada ${formatDate(first.date)} menjadi ${formatGram(last.cumulative_g)} pada ${formatDate(last.date)}.`;
 
     const ticks = [0, top / 2, top];
 
@@ -80,7 +80,7 @@ export default function GrowthChart({ points, formatGram, formatDate }: { points
                         onMouseEnter={() => setActive(i)} onFocus={() => setActive(i)} onBlur={() => setActive(null)} />
                 ))}
             </svg>
-            <TableView caption="Pertumbuhan emas murni" head={['Tanggal', 'Total emas murni']} rows={points.map((p) => [formatDate(p.date), formatGram(p.cumulative_g)])} />
+            <TableView caption="Pertumbuhan total berat emas" head={['Tanggal', 'Total berat emas']} rows={points.map((p) => [formatDate(p.date), formatGram(p.cumulative_g)])} />
         </div>
     );
 }
