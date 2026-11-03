@@ -52,7 +52,7 @@ class ZakatPreviewTest extends TestCase
     {
         $this->dueBars($this->user);
 
-        foreach (['maliki', 'hanbali', 'xyz'] as $madhhab) {
+        foreach (['xyz', 'shafii', 'hanafii'] as $madhhab) {
             $this->get('/zakat/hitung?'.http_build_query($this->inputs($madhhab)))
                 ->assertInertia(fn (Assert $p) => $p->where('result', null)->has('form_errors.madhhab'));
         }

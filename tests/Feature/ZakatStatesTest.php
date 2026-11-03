@@ -32,7 +32,7 @@ class ZakatStatesTest extends TestCase
         $this->get('/zakat')->assertInertia(fn (Assert $p) => $p
             ->component('Zakat/Index')
             ->where('periods', [])
-            ->has('madhhabs', 2));
+            ->has('madhhabs', 4));
     }
 
     public function test_due_shows_grams_and_rupiah_only_with_a_price(): void

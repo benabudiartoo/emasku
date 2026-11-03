@@ -29,6 +29,38 @@ class ZakatComparisonTest extends TestCase
         $this->assertSame0('3', $syafii->shortfallG);
     }
 
+    public function test_four_madhhab_over_one_collection_each_follow_their_own_sheet(): void
+    {
+        // 82 g of bars plus a worn 6 g ring: only Hanafi counts the ring and has a nisab (87.48) that 88 g clears.
+        $items = [$this->bar('bar', '82'), $this->ring('ring', '6', 'worn')];
+
+        $expected = ['hanafi' => ['88', 'due'], 'syafii' => ['82', 'below_nisab'], 'maliki' => ['82', 'below_nisab'], 'hanbali' => ['82', 'below_nisab']];
+        foreach ($expected as $madhhab => [$eligible, $outcome]) {
+            $r = $this->calculate($madhhab, $items);
+
+            $this->assertSame0($eligible, $r->eligibleG, $madhhab);
+            $this->assertSame($outcome, $r->outcome, $madhhab);
+        }
+    }
+
+    public function test_every_offered_madhhab_gives_the_result_its_own_sheet_predicts(): void
+    {
+        // Driven by the rule sheets: whatever sheets exist, the result must follow their nisab and jewelry rule.
+        $items = [$this->bar('bar', '84'), $this->ring('worn-ring', '5', 'worn'), $this->ring('saved-ring', '2', 'investment')];
+
+        foreach (ZakatRuleSet::supported() as $madhhab) {
+            $sheet = ZakatRuleSet::for($madhhab);
+            $eligible = bcadd('86', $sheet->wornJewelryZakatable ? '5' : '0', 10); // bar 84 + saved ring 2 (+ worn 5)
+            $due = bccomp($eligible, $sheet->nisabG, 10) >= 0;
+
+            $r = $this->calculate($madhhab, $items);
+
+            $this->assertSame0($eligible, $r->eligibleG, $madhhab);
+            $this->assertSame($due ? ZakatResult::DUE : ZakatResult::BELOW_NISAB, $r->outcome, $madhhab);
+            $this->assertSame($sheet->version, $r->ruleVersion, $madhhab);
+        }
+    }
+
     public function test_nisab_differs_per_sheet_for_the_same_gold(): void
     {
         // 86 g of bars: over the Syafi'i nisab (85) but under the Hanafi one (87.48).
@@ -79,12 +111,12 @@ class ZakatComparisonTest extends TestCase
 
     public function test_only_madhhab_with_complete_sheets_are_offered(): void
     {
-        $this->assertSame(['hanafi', 'syafii'], ZakatRuleSet::supported());
+        $this->assertSame(['hanafi', 'syafii', 'maliki', 'hanbali'], ZakatRuleSet::supported());
     }
 
     public function test_madhhab_without_a_rule_sheet_is_refused(): void
     {
-        foreach (['maliki', 'hanbali', 'unknown'] as $madhhab) {
+        foreach (['unknown', 'xyz', "syafi'i"] as $madhhab) {
             try {
                 $this->calculate($madhhab, [$this->bar('bar', '100')]);
                 $this->fail("Expected {$madhhab} to be refused");
@@ -98,7 +130,7 @@ class ZakatComparisonTest extends TestCase
     {
         config(['zakat_rules.madhhabs.hanafi.references' => []]);
 
-        $this->assertSame(['syafii'], ZakatRuleSet::supported());
+        $this->assertSame(['syafii', 'maliki', 'hanbali'], ZakatRuleSet::supported());
         $this->expectException(UnsupportedMadhhabException::class);
         ZakatRuleSet::for('hanafi');
     }

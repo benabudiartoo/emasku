@@ -82,7 +82,7 @@ class ZakatSaveTest extends TestCase
     {
         $this->dueBars($this->user);
 
-        $this->post('/zakat/periode', $this->inputs('maliki'))->assertSessionHasErrors('madhhab');
+        $this->post('/zakat/periode', $this->inputs('xyz'))->assertSessionHasErrors('madhhab');
         $this->post('/zakat/periode', ['madhhab' => 'hanafi'])->assertSessionHasErrors('date');
         $this->post('/zakat/periode', $this->inputs('hanafi', ['price' => '0']))->assertSessionHasErrors('price');
 
