@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Item;
+use App\Models\ZakatPeriod;
 use App\Services\GoldCalculator;
 use App\Services\ItemPresenter;
+use App\Services\Zakat\ZakatPresenter;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -30,7 +32,16 @@ class SummaryController extends Controller
                 $summary['incomplete_items'],
             ),
             'today' => now()->toDateString(),
+            'zakat' => $this->latestZakat($request->user()->id),
         ]);
+    }
+
+    /** The latest saved zakat period of this owner, for the "Status zakat" card; null before the first one. */
+    private function latestZakat(string $userId): ?array
+    {
+        $latest = ZakatPeriod::where('user_id', $userId)->orderByDesc('valuation_date')->orderByDesc('created_at')->first();
+
+        return $latest ? ZakatPresenter::summary($latest) : null;
     }
 
     public function detail(Request $request, string $metric): Response

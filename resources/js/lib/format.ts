@@ -17,7 +17,16 @@ export function rupiah(value: string | null): string {
     return value === null ? '' : `Rp ${gram(value, 0)}`;
 }
 
-export const KIND_LABEL = { bar: 'Batangan', jewelry: 'Perhiasan' } as const;
+/** '0.025000' -> '2,5' (a rate as a percentage, without floating point). */
+export function percent(rate: string): string {
+    const [, dec = ''] = rate.split('.');
+    const digits = dec.replace(/0+$/, '').padEnd(2, '0');
+    const whole = parseInt(digits.slice(0, 2), 10);
+    const frac = digits.slice(2);
+    return frac ? `${whole},${frac}` : String(whole);
+}
+
+export const KIND_LABEL ={ bar: 'Batangan', jewelry: 'Perhiasan' } as const;
 
 export const PURITY_UNIT = { permil: '‰', percent: '%', karat: 'karat' } as const;
 

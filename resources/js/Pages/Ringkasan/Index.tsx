@@ -5,6 +5,7 @@ import PilihJenisModal from '@/Components/PilihJenisModal';
 import Secret from '@/Components/Secret';
 import AppLayout from '@/Layouts/AppLayout';
 import { dateId, gram, missingText } from '@/lib/format';
+import type { ZakatSummary } from '@/types';
 
 type Props = {
     has_any: boolean;
@@ -15,9 +16,18 @@ type Props = {
     complete: number;
     incomplete: { id: string; name: string; missing: string[] }[];
     today: string;
+    zakat: ZakatSummary | null;
 };
 
-export default function Index({ has_any, active_count, bars, jewelry, pure_gold_g, complete, incomplete, today }: Props) {
+/** The latest saved zakat calculation in one line; amounts follow "Sembunyikan nominal". */
+function ZakatState({ zakat }: { zakat: ZakatSummary | null }) {
+    if (!zakat) return <span className="text-muted">Belum dihitung</span>;
+    if (zakat.status === 'needs_review') return <span className="text-warn">Perlu peninjauan</span>;
+    if (zakat.outcome === 'due') return <><Secret>{gram(zakat.zakat_g)}</Secret> g</>;
+    return <span className="text-muted">{zakat.outcome === 'below_nisab' ? 'Belum mencapai nisab' : 'Haul belum genap'}</span>;
+}
+
+export default function Index({ has_any, active_count, bars, jewelry, pure_gold_g, complete, incomplete, today, zakat }: Props) {
     const [pick, setPick] = useState(false);
 
     return (
@@ -77,6 +87,15 @@ export default function Index({ has_any, active_count, bars, jewelry, pure_gold_
                                         <span className="block text-lg font-semibold"><Secret>{active_count}</Secret> barang</span>
                                     </span>
                                     <span className="hidden text-sm text-muted sm:block">{bars} batangan · {jewelry} perhiasan</span>
+                                    <CaretRight size={18} className="text-muted" aria-hidden />
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/zakat" className="flex min-h-14 items-center gap-3 px-4 py-3 transition-colors hover:bg-paper">
+                                    <span className="min-w-0 flex-1">
+                                        <span className="block text-sm text-muted">Status zakat</span>
+                                        <span className="block text-base font-medium"><ZakatState zakat={zakat} /></span>
+                                    </span>
                                     <CaretRight size={18} className="text-muted" aria-hidden />
                                 </Link>
                             </li>

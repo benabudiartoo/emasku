@@ -7,6 +7,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SummaryController;
+use App\Http\Controllers\ZakatController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -26,6 +27,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/mulai', fn () => Inertia::render('Mulai'));
     Route::get('/ringkasan', [SummaryController::class, 'index']);
     Route::get('/ringkasan/rincian/{metric}', [SummaryController::class, 'detail']);
+
+    Route::get('/zakat', [ZakatController::class, 'index']);
+    Route::get('/zakat/hitung', [ZakatController::class, 'hitung']);
+    Route::post('/zakat/periode', [ZakatController::class, 'store']);
+    Route::get('/zakat/periode/{period}', [ZakatController::class, 'show']);
 
     Route::get('/koleksi', [ItemController::class, 'index']);
     Route::get('/koleksi/lama', [ItemController::class, 'createOld']);

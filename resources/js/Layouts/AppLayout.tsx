@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
-import { Coins, Eye, EyeSlash, List, SquaresFour, Vault } from '@phosphor-icons/react';
+import { Coins, Eye, EyeSlash, List, Scales, SquaresFour, Vault } from '@phosphor-icons/react';
 import { initHidden, toggleHidden, useHidden } from '@/Components/Secret';
 import Toasts from '@/Components/Toasts';
 import type { SharedProps } from '@/types';
@@ -8,6 +8,7 @@ import type { SharedProps } from '@/types';
 const TABS = [
     { href: '/ringkasan', label: 'Ringkasan', Icon: SquaresFour },
     { href: '/koleksi', label: 'Koleksi', Icon: Vault },
+    { href: '/zakat', label: 'Zakat', Icon: Scales },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -47,7 +48,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             </header>
 
             <nav aria-label="Navigasi utama" className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-white/95 backdrop-blur md:hidden">
-                <ul className="mx-auto grid max-w-md grid-cols-2">
+                <ul className="mx-auto grid max-w-md grid-cols-3">
                     {TABS.map(({ href, label, Icon }) => (
                         <li key={href}>
                             <Link href={href} aria-current={active(href) ? 'page' : undefined}
