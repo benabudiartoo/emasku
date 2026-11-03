@@ -1,0 +1,239 @@
+import { router, useForm, usePage } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
+import type { FormEvent, ReactNode } from 'react';
+import { Plus, Trash } from '@phosphor-icons/react';
+import Field from '@/Components/Field';
+import LocationModal from '@/Components/LocationModal';
+import Modal from '@/Components/Modal';
+import { ACQUISITION_LABEL, DATE_CERTAINTY, inputNumber } from '@/lib/format';
+import type { Item, Loc, SharedProps } from '@/types';
+
+type Props = {
+    kind: 'bar' | 'jewelry';
+    old?: boolean;
+    item?: Item;
+    locations: Loc[];
+    cancelHref: string;
+};
+
+const JEWELRY_TYPES: Record<string, string> = { cincin: 'Cincin', kalung: 'Kalung', gelang: 'Gelang', anting: 'Anting', liontin: 'Liontin', lainnya: 'Lainnya' };
+const PURPOSES: Record<string, string> = { worn: 'Dipakai', investment: 'Simpanan / investasi', undecided: 'Belum ditentukan' };
+const PURITY_UNITS: Record<string, string> = { permil: 'Permil (‰), mis. 999,9 atau 750', percent: 'Persen (%), mis. 75', karat: 'Karat, mis. 18 (perkiraan)' };
+
+export default function ItemForm({ kind: initialKind, old = false, item, locations, cancelHref }: Props) {
+    const editing = !!item;
+    const page = usePage<SharedProps>();
+    const [locOpen, setLocOpen] = useState(false);
+    const [discardOpen, setDiscardOpen] = useState(false);
+
+    const form = useForm({
+        kind: initialKind as string,
+        old,
+        then: 'done',
+        name: item?.name ?? '',
+        brand: item?.brand ?? '',
+        location_id: item?.location_id ?? '',
+        ownership: item?.ownership ?? 'own',
+        held_for: item?.held_for ?? '',
+        unit_weight_g: inputNumber(item?.unit_weight_g ?? null),
+        unit_mode: item && item.units.length === 1 && item.units[0].serial_number === null && item.units[0].quantity > 1 ? 'lot' : 'serial',
+        serials: item?.kind === 'bar' && item.units.length ? item.units.map((u) => u.serial_number ?? '') : [''],
+        quantity: String(item?.kind === 'bar' && item.units.length === 1 ? item.units[0].quantity : 1),
+        jewelry_type: item?.jewelry_type ?? '',
+        gross_weight_g: inputNumber(item?.gross_weight_g ?? null),
+        stone_state: item?.stone_state ?? 'unknown',
+        stone_weight_g: inputNumber(item?.stone_weight_g ?? null),
+        net_weight_g: inputNumber(item?.net_weight_g ?? null),
+        purpose: item?.purpose ?? 'undecided',
+        purity_source: item?.purity_source ?? 'permil',
+        purity_input: inputNumber(item?.purity_input ?? null),
+        acquisition_method: item?.acquisition_method ?? (old ? 'opening_balance' : 'purchase'),
+        acquisition_cost: inputNumber(item?.acquisition_cost ?? null),
+        owned_since: item?.owned_since ?? '',
+        owned_since_certainty: item?.owned_since_certainty ?? 'exact',
+        owned_since_note: item?.owned_since_note ?? '',
+        haul_start: item?.haul_start ?? '',
+        haul_start_certainty: item?.haul_start_certainty ?? 'exact',
+        haul_start_note: item?.haul_start_note ?? '',
+        notes: item?.notes ?? '',
+        photo: null as File | null,
+    });
+    const { data, setData, errors } = form;
+    const isBar = data.kind === 'bar';
+
+    // A location created from the modal is selected right away.
+    useEffect(() => {
+        if (page.props.new_location_id) setData('location_id', page.props.new_location_id);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [page.props.new_location_id]);
+
+    const send = (then: 'done' | 'another') => {
+        form.transform((d) => ({ ...d, then, ...(editing ? { _method: 'patch' } : {}) }));
+        form.post(editing ? `/koleksi/${item!.id}` : '/koleksi', { forceFormData: true, preserveScroll: true });
+    };
+    const submit = (e: FormEvent) => { e.preventDefault(); send('done'); };
+
+    const cancel = () => (form.isDirty ? setDiscardOpen(true) : router.visit(cancelHref));
+    const text = (id: keyof typeof data, props: Record<string, unknown> = {}) => (
+        <input id={id} value={String(data[id] ?? '')} onChange={(e) => setData(id, e.target.value as never)} className="field-input" {...props} />
+    );
+    const select = (id: keyof typeof data, options: Record<string, string>, placeholder?: string) => (
+        <select id={id} value={String(data[id] ?? '')} onChange={(e) => setData(id, e.target.value as never)} className="field-input">
+            {placeholder !== undefined && <option value="">{placeholder}</option>}
+            {Object.entries(options).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+        </select>
+    );
+    const err = (k: string) => (errors as Record<string, string>)[k];
+
+    return (
+        <>
+            <form onSubmit={submit} className="space-y-6" noValidate>
+                {old && !editing && (
+                    <div role="group" aria-label="Jenis barang" className="inline-flex rounded-xl border border-line bg-white p-1">
+                        {(['bar', 'jewelry'] as const).map((k) => (
+                            <button key={k} type="button" aria-pressed={data.kind === k} onClick={() => setData('kind', k)}
+                                className={`h-9 rounded-lg px-4 text-sm font-medium ${data.kind === k ? 'bg-brand text-white' : 'text-muted'}`}>
+                                {k === 'bar' ? 'Batangan' : 'Perhiasan'}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
+                <Section title="Identitas">
+                    <Field id="name" label="Nama barang" error={err('name')}>
+                        {text('name', { required: true, maxLength: 160, placeholder: isBar ? 'Batangan Antam 10 g' : 'Cincin kawin' })}
+                    </Field>
+                    {isBar
+                        ? <Field id="brand" label="Merek (opsional)" error={err('brand')}>{text('brand', { placeholder: 'Antam, UBS' })}</Field>
+                        : <Field id="jewelry_type" label="Jenis perhiasan" error={err('jewelry_type')}>{select('jewelry_type', JEWELRY_TYPES, 'Pilih jenis')}</Field>}
+                    <Field id="ownership" label="Kepemilikan" error={err('ownership')} hint="Titipan orang lain tidak dihitung dalam total Anda.">
+                        {select('ownership', { own: 'Milik sendiri', held_for_others: 'Titipan orang lain' })}
+                    </Field>
+                    {data.ownership === 'held_for_others' && (
+                        <Field id="held_for" label="Titipan siapa" error={err('held_for')}>{text('held_for', { placeholder: 'Nama pemilik' })}</Field>
+                    )}
+                </Section>
+
+                <Section title="Berat dan kadar">
+                    {isBar ? (
+                        <>
+                            <Field id="unit_weight_g" label="Berat per keping (gram)" error={err('unit_weight_g')} hint="Kosongkan bila belum tahu; angka akan ditandai Data diperlukan.">
+                                {text('unit_weight_g', { inputMode: 'decimal', placeholder: '10' })}
+                            </Field>
+                            <div role="group" aria-label="Cara mencatat keping" className="inline-flex rounded-xl border border-line bg-white p-1">
+                                {([['serial', 'Per keping bernomor seri'], ['lot', 'Lot identik']] as const).map(([v, l]) => (
+                                    <button key={v} type="button" aria-pressed={data.unit_mode === v} onClick={() => setData('unit_mode', v)}
+                                        className={`h-9 rounded-lg px-3 text-sm font-medium ${data.unit_mode === v ? 'bg-brand text-white' : 'text-muted'}`}>{l}</button>
+                                ))}
+                            </div>
+                            {data.unit_mode === 'lot' ? (
+                                <Field id="quantity" label="Jumlah keping" error={err('quantity')}>{text('quantity', { inputMode: 'numeric', placeholder: '5' })}</Field>
+                            ) : (
+                                <div>
+                                    <span className="block text-sm font-medium">Nomor seri (satu baris per keping)</span>
+                                    {data.serials.map((s, i) => (
+                                        <div key={i} className="mt-1.5 flex gap-2">
+                                            <input aria-label={`Nomor seri keping ${i + 1}`} value={s} placeholder="Boleh dikosongkan"
+                                                onChange={(e) => setData('serials', data.serials.map((x, j) => (j === i ? e.target.value : x)))}
+                                                className="field-input !mt-0" />
+                                            {data.serials.length > 1 && (
+                                                <button type="button" aria-label={`Hapus keping ${i + 1}`} onClick={() => setData('serials', data.serials.filter((_, j) => j !== i))}
+                                                    className="btn btn-secondary !px-3"><Trash size={18} aria-hidden /></button>
+                                            )}
+                                        </div>
+                                    ))}
+                                    {err('serials') && <p role="alert" className="mt-1 text-sm text-red-800">{err('serials')}</p>}
+                                    <button type="button" onClick={() => setData('serials', [...data.serials, ''])} className="btn btn-secondary mt-2"><Plus size={16} aria-hidden />Tambah keping</button>
+                                    <p className="mt-1 text-xs text-muted">Nomor seri yang sama pada dua keping hanya diperingatkan, tidak ditolak.</p>
+                                </div>
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            <Field id="gross_weight_g" label="Berat kotor (gram)" error={err('gross_weight_g')}>{text('gross_weight_g', { inputMode: 'decimal', placeholder: '8' })}</Field>
+                            <Field id="stone_state" label="Batu" error={err('stone_state')} hint="“Belum diketahui” tidak sama dengan tanpa batu.">
+                                {select('stone_state', { none: 'Tanpa batu', known: 'Ada batu, berat diketahui', unknown: 'Belum diketahui' })}
+                            </Field>
+                            {data.stone_state === 'known' && (
+                                <Field id="stone_weight_g" label="Berat batu (gram)" error={err('stone_weight_g')}>{text('stone_weight_g', { inputMode: 'decimal', placeholder: '2' })}</Field>
+                            )}
+                            <Field id="net_weight_g" label="Berat bersih logam (gram, opsional)" error={err('net_weight_g')} hint="Bila ditimbang sendiri, angka ini dipakai menggantikan kotor dikurangi batu.">
+                                {text('net_weight_g', { inputMode: 'decimal' })}
+                            </Field>
+                            <Field id="purpose" label="Tujuan" error={err('purpose')}>{select('purpose', PURPOSES)}</Field>
+                        </>
+                    )}
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <Field id="purity_source" label="Satuan kadar" error={err('purity_source')}>{select('purity_source', PURITY_UNITS)}</Field>
+                        <Field id="purity_input" label="Kadar" error={err('purity_input')}>{text('purity_input', { inputMode: 'decimal', placeholder: isBar ? '999,9' : '750' })}</Field>
+                    </div>
+                </Section>
+
+                <Section title="Perolehan dan tanggal">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <Field id="acquisition_method" label="Cara perolehan" error={err('acquisition_method')}>{select('acquisition_method', ACQUISITION_LABEL)}</Field>
+                        <Field id="acquisition_cost" label="Harga perolehan (Rp, opsional)" error={err('acquisition_cost')}>{text('acquisition_cost', { inputMode: 'numeric', placeholder: 'Kosong = tidak diketahui' })}</Field>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <Field id="owned_since" label="Dimiliki sejak" error={err('owned_since')} hint="Berbeda dari tanggal Anda mencatat di aplikasi ini.">
+                            {text('owned_since', { type: 'date', max: new Date().toISOString().slice(0, 10) })}
+                        </Field>
+                        <Field id="owned_since_certainty" label="Kepastian tanggal" error={err('owned_since_certainty')}>{select('owned_since_certainty', DATE_CERTAINTY)}</Field>
+                    </div>
+                    <Field id="owned_since_note" label="Catatan tanggal (opsional)" error={err('owned_since_note')}>{text('owned_since_note', { placeholder: 'Mis. dibeli menjelang lebaran' })}</Field>
+                    {(old || data.haul_start) && (
+                        <>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <Field id="haul_start" label="Awal haul diketahui (opsional)" error={err('haul_start')}>
+                                    {text('haul_start', { type: 'date', max: new Date().toISOString().slice(0, 10) })}
+                                </Field>
+                                <Field id="haul_start_certainty" label="Kepastian awal haul" error={err('haul_start_certainty')}>{select('haul_start_certainty', DATE_CERTAINTY)}</Field>
+                            </div>
+                            <Field id="haul_start_note" label="Catatan awal haul (opsional)" error={err('haul_start_note')}>{text('haul_start_note')}</Field>
+                        </>
+                    )}
+                </Section>
+
+                <Section title="Lokasi, foto, dan catatan">
+                    <Field id="location_id" label="Lokasi simpan" error={err('location_id')}>
+                        {select('location_id', Object.fromEntries(locations.map((l) => [l.id, l.name])), 'Belum ditentukan')}
+                    </Field>
+                    <button type="button" onClick={() => setLocOpen(true)} className="-mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-brand-dark underline underline-offset-2">Lokasi baru</button>
+                    <Field id="photo" label={editing ? 'Tambah foto (opsional)' : 'Foto (opsional)'} error={err('photo')} hint="JPG, PNG, atau WebP, maksimal 5 MB. Foto bersifat pribadi.">
+                        <input id="photo" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setData('photo', e.target.files?.[0] ?? null)}
+                            className="mt-1.5 block w-full text-sm file:mr-3 file:h-11 file:rounded-xl file:border file:border-line file:bg-white file:px-4 file:text-sm file:font-medium" />
+                    </Field>
+                    <Field id="notes" label="Catatan (opsional)" error={err('notes')}>
+                        <textarea id="notes" rows={3} value={data.notes} onChange={(e) => setData('notes', e.target.value)} className="field-input !h-auto py-2" />
+                    </Field>
+                </Section>
+
+                <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                    <button type="button" onClick={cancel} className="btn btn-secondary">Batal</button>
+                    {old && !editing && (
+                        <button type="button" disabled={form.processing} onClick={() => send('another')} className="btn btn-secondary">Simpan dan tambah lagi</button>
+                    )}
+                    <button type="submit" disabled={form.processing} className="btn btn-primary">{old && !editing ? 'Simpan dan selesai' : 'Simpan'}</button>
+                </div>
+            </form>
+
+            <LocationModal open={locOpen} onClose={() => setLocOpen(false)} />
+            <Modal open={discardOpen} onClose={() => setDiscardOpen(false)} title="Buang perubahan?">
+                <p className="text-sm text-muted">Isian yang belum disimpan akan hilang.</p>
+                <div className="mt-4 flex gap-3">
+                    <button type="button" onClick={() => setDiscardOpen(false)} className="btn btn-secondary flex-1">Lanjut mengisi</button>
+                    <button type="button" onClick={() => router.visit(cancelHref)} className="btn btn-primary flex-1">Buang</button>
+                </div>
+            </Modal>
+        </>
+    );
+}
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+    return (
+        <fieldset className="panel space-y-4 p-4 sm:p-5">
+            <legend className="px-1 text-base font-semibold">{title}</legend>
+            {children}
+        </fieldset>
+    );
+}

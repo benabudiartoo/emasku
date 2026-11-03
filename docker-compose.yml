@@ -1,0 +1,43 @@
+# Caddy runs on the HOST (apt install caddy) and reverse-proxies to localhost:8081.
+# Example /etc/caddy/Caddyfile block:
+#   emas.example.co.id {
+#       reverse_proxy localhost:8081
+#   }
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8081:8080"
+    env_file: .env
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-catatan_emas}
+      DB_USERNAME: ${DB_USERNAME:-emas}
+      DB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    volumes:
+      - appstorage:/var/www/html/storage/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-catatan_emas}
+      POSTGRES_USER: ${DB_USERNAME:-emas}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-emas} -d ${DB_DATABASE:-catatan_emas}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
+  appstorage:

@@ -1,0 +1,32 @@
+@import 'tailwindcss';
+
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.tsx';
+
+@theme {
+    --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+    --color-paper: #f4f5f2;
+    --color-ink: #14201b;
+    --color-muted: #55635c;
+    --color-line: #dde2dc;
+    --color-brand: #1f6b52;
+    --color-brand-dark: #17543f;
+    --color-brand-soft: #e6f1ec;
+    --color-warn: #7a4a00;
+    --color-warn-soft: #fbf0d9;
+    --color-warn-line: #ecd29b;
+}
+
+@layer base {
+    body { font-feature-settings: 'tnum' 1; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    h1, h2 { text-wrap: balance; }
+}
+
+@layer components {
+    .panel { @apply rounded-2xl border border-line bg-white; }
+    .btn { @apply inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 text-sm font-medium transition-colors duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60; }
+    .btn-primary { @apply bg-brand text-white hover:bg-brand-dark; }
+    .btn-secondary { @apply border border-line bg-white text-ink hover:bg-paper; }
+    .field-input { @apply mt-1.5 h-11 w-full rounded-xl border border-line bg-white px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand; }
+}
