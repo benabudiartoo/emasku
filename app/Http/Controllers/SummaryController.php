@@ -6,6 +6,7 @@ use App\Models\Item;
 use App\Models\ZakatPeriod;
 use App\Services\GoldCalculator;
 use App\Services\ItemPresenter;
+use App\Services\SummaryCharts;
 use App\Services\Zakat\ZakatPresenter;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,10 +18,11 @@ class SummaryController extends Controller
 
     public function index(Request $request): Response
     {
-        $items = Item::where('user_id', $request->user()->id)->with('units')->get();
+        $items = Item::where('user_id', $request->user()->id)->with('units', 'location')->get();
         $summary = $this->calc->summarize($items);
 
         return Inertia::render('Ringkasan/Index', [
+            'charts' => app(SummaryCharts::class)->build($items),
             'has_any' => $items->isNotEmpty(),
             'active_count' => $summary['counted'],
             'bars' => $items->where('ownership', 'own')->where('kind', 'bar')->count(),

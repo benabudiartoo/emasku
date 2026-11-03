@@ -116,3 +116,30 @@ export type Item = {
     status: 'complete' | 'needs_data';
     missing: string[];
 };
+
+/** Gram figures for the summary charts (computed on the server from the owner's complete own items). */
+export type ChartRow = { label: string; pure_gold_g: string };
+
+export type SummaryChartsData = {
+    by_kind: ChartRow[];
+    by_location: ChartRow[];
+    growth: {
+        points: { date: string; cumulative_g: string }[];
+        undated_count: number;
+        approximate_count: number;
+    };
+};
+
+/** What GET /ringkasan/nilai returns on success: value in rupiah and the comparison with the purchase price. */
+export type PortfolioValueData = {
+    price: PriceQuote;
+    total_value: string;
+    comparison: {
+        cost: string;
+        value: string;
+        difference: string;
+        difference_percent: string | null;
+        items_with_cost: number;
+        items_without_cost: number;
+    } | null;
+};

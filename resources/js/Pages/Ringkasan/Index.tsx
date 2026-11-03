@@ -6,7 +6,8 @@ import PilihJenisModal from '@/Components/PilihJenisModal';
 import Secret from '@/Components/Secret';
 import AppLayout from '@/Layouts/AppLayout';
 import { dateId, gram, missingText } from '@/lib/format';
-import type { ZakatSummary } from '@/types';
+import type { SummaryChartsData, ZakatSummary } from '@/types';
+import Grafik from './Grafik';
 
 type Props = {
     has_any: boolean;
@@ -18,6 +19,7 @@ type Props = {
     incomplete: { id: string; name: string; missing: string[] }[];
     today: string;
     zakat: ZakatSummary | null;
+    charts: SummaryChartsData;
 };
 
 /** The latest saved zakat calculation in one line; amounts follow "Sembunyikan nominal". */
@@ -28,7 +30,7 @@ function ZakatState({ zakat }: { zakat: ZakatSummary | null }) {
     return <span className="text-muted">{zakat.outcome === 'below_nisab' ? 'Belum mencapai nisab' : 'Haul belum genap'}</span>;
 }
 
-export default function Index({ has_any, active_count, bars, jewelry, pure_gold_g, complete, incomplete, today, zakat }: Props) {
+export default function Index({ has_any, active_count, bars, jewelry, pure_gold_g, complete, incomplete, today, zakat, charts }: Props) {
     const [pick, setPick] = useState(false);
 
     return (
@@ -106,6 +108,8 @@ export default function Index({ has_any, active_count, bars, jewelry, pure_gold_
                     </section>
                 </div>
             )}
+
+            {has_any && <Grafik charts={charts} />}
 
             {has_any && <button type="button" onClick={() => setPick(true)} className="btn btn-primary fixed bottom-20 right-4 z-10 h-12 px-5 shadow-lg md:hidden"><Plus size={18} aria-hidden />Tambah emas</button>}
             <PilihJenisModal open={pick} onClose={() => setPick(false)} />

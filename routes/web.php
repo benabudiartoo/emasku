@@ -7,6 +7,7 @@ use App\Http\Controllers\ExportController;
 use App\Http\Controllers\GoldPriceController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\PortfolioValueController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\ZakatController;
@@ -29,6 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/mulai', fn () => Inertia::render('Mulai'));
     Route::get('/ringkasan', [SummaryController::class, 'index']);
     Route::get('/ringkasan/rincian/{metric}', [SummaryController::class, 'detail']);
+    Route::get('/ringkasan/nilai', [PortfolioValueController::class, 'show'])->middleware('throttle:gold-price');
 
     Route::get('/zakat', [ZakatController::class, 'index']);
     Route::get('/zakat/hitung', [ZakatController::class, 'hitung']);

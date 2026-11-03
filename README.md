@@ -40,6 +40,16 @@ Di `/zakat/hitung`, tombol **Ambil harga terbaru** mengisi harga emas per gram d
 - Bila sumber gagal (dimatikan, batas terlampaui, galat), tombol menampilkan pesan dan harga tetap diisi manual; tidak pernah ada angka nol atau data usang.
 - goldprice.org tidak dipakai (syarat penggunaannya melarang pengambilan otomatis) dan GoldPriceZ tidak dipakai (perlu kunci terdaftar).
 
+## Grafik di Ringkasan
+
+Halaman Ringkasan punya empat grafik, dari barang milik sendiri yang datanya lengkap (barang titipan dan barang yang belum lengkap tidak ikut, dan tidak pernah dihitung sebagai nol):
+
+- **Emas murni per jenis** dan **per lokasi** (gram). Lokasi: lima terbesar, sisanya digabung sebagai "Lainnya"; barang tanpa lokasi tampil sebagai "Tanpa lokasi".
+- **Pertumbuhan emas murni**: total gram kumulatif menurut "Dimiliki sejak". Barang tanpa tanggal tidak digambar dan jumlahnya ditulis; jumlah tanggal perkiraan juga ditulis.
+- **Nilai sekarang vs harga beli** (Rp): nilai = gram emas murni x harga terbaru (Gold-API.com x kurs Frankfurter, lihat bagian harga otomatis), dihitung di server dengan bcmath. Pembandingnya hanya barang yang "Harga perolehan"-nya diisi, dibanding nilai barang yang sama. Harga perolehan dianggap total untuk satu catatan barang, bukan per keping. Bila tidak ada barang berharga perolehan, hanya nilai total yang tampil.
+- Nilai rupiah dimuat setelah halaman terbuka lewat `GET /ringkasan/nilai`. Bila harga gagal diambil atau `GOLDPRICE_ENABLED=false`, grafik rupiah diganti pesan dan grafik gram tetap tampil. Ini harga spot internasional, bukan harga toko emas.
+- Saat "Sembunyikan nominal" aktif, isi semua grafik diganti "Nominal disembunyikan" (bentuk batang pun bisa membocorkan angka). Setiap grafik punya tampilan tabel.
+
 ## Ekspor Excel dan PDF
 
 Tombol **Unduh Excel** dan **Unduh PDF** ada di Koleksi (mengikuti filter yang aktif), Ringkasan, daftar Zakat, dan detail satu perhitungan zakat.
