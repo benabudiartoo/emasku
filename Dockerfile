@@ -8,8 +8,8 @@ RUN npm run build
 
 FROM php:8.2-fpm-alpine
 
-RUN apk add --no-cache supervisor nginx libpq-dev libzip-dev $PHPIZE_DEPS \
-    && docker-php-ext-install pdo_pgsql bcmath zip opcache \
+RUN apk add --no-cache supervisor nginx libpq-dev libzip-dev icu-dev $PHPIZE_DEPS \
+    && docker-php-ext-install pdo_pgsql bcmath zip opcache intl \
     && apk del $PHPIZE_DEPS
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
