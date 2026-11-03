@@ -1,6 +1,6 @@
 export type Toast = { type: 'success' | 'error' | 'info'; message: string };
 
-export type AuthUser = { id: string; name: string; email: string; hide_amounts: boolean };
+export type AuthUser = { id: string; name: string; email: string; hide_amounts: boolean; is_admin: boolean };
 
 export type SharedProps = {
     auth: { user: AuthUser | null };
@@ -142,4 +142,29 @@ export type PortfolioValueData = {
         items_with_cost: number;
         items_without_cost: number;
     } | null;
+};
+
+/** The light admin page: counts only, never an owner's items, weights, values, or zakat results. */
+export type AdminTotals = { users: number; active_30d: number; new_30d: number; items: number; zakat_periods: number };
+
+export type AdminUser = {
+    id: string;
+    name: string;
+    email: string;
+    is_admin: boolean;
+    created_at: string | null;
+    last_login_at: string | null;
+    items_count: number;
+    zakat_periods_count: number;
+};
+
+export type AdminUsers = {
+    data: AdminUser[];
+    total: number;
+    from: number | null;
+    to: number | null;
+    current_page: number;
+    last_page: number;
+    prev_url: string | null;
+    next_url: string | null;
 };

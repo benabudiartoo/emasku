@@ -40,6 +40,14 @@ Di `/zakat/hitung`, tombol **Ambil harga terbaru** mengisi harga emas per gram d
 - Bila sumber gagal (dimatikan, batas terlampaui, galat), tombol menampilkan pesan dan harga tetap diisi manual; tidak pernah ada angka nol atau data usang.
 - goldprice.org tidak dipakai (syarat penggunaannya melarang pengambilan otomatis) dan GoldPriceZ tidak dipakai (perlu kunci terdaftar).
 
+## Halaman admin ringan
+
+`/admin` menampilkan siapa saja yang memakai aplikasi, **hanya sebagai jumlah**: total pengguna, aktif dan baru dalam 30 hari, total barang dan perhitungan zakat, lalu daftar pengguna (nama, email, tanggal daftar, terakhir masuk, jumlah barang, jumlah zakat). Isi emas, berat, nilai, lokasi, catatan, foto, dan hasil zakat siapa pun tidak pernah ditampilkan.
+
+- Jadikan seseorang admin dari server: `docker compose exec app php artisan user:admin email@contoh.com`. Cabut dengan `--revoke`. Tidak ada jalur lewat web, dan `is_admin` tidak bisa diisi lewat form daftar atau pengaturan.
+- Pengguna biasa dan tamu yang membuka `/admin` mendapat halaman "tidak ditemukan". Admin melihat baris "Admin" di Menu lainnya.
+- "Terakhir masuk" tercatat sejak versi ini; pengguna lama tampil "Belum pernah masuk" sampai masuk lagi.
+
 ## Grafik di Ringkasan
 
 Halaman Ringkasan juga menampilkan **Total berat emas** (berat bersih semua barang milik sendiri, tanpa batu dan tanpa melihat kadar) di samping total emas murni; angkanya bisa lebih besar karena barang di bawah 24 karat. Barang yang beratnya belum bisa dihitung tidak dijumlah dan jumlahnya ditulis.

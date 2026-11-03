@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Without this Laravel builds http:// URLs behind the proxy (mixed content, insecure cookies).
         $middleware->trustProxies(at: '*');
         $middleware->web(append: [HandleInertiaRequests::class]);
+        $middleware->alias(['admin' => EnsureAdmin::class]);
         $middleware->redirectGuestsTo('/login');
         $middleware->redirectUsersTo('/ringkasan');
     })

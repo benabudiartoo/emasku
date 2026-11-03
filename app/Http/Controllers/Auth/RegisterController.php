@@ -29,6 +29,7 @@ class RegisterController extends Controller
         $user = User::create($data);
         Auth::login($user);
         $request->session()->regenerate();
+        $user->forceFill(['last_login_at' => now()])->save();
 
         return redirect('/mulai')->with('toast', ['type' => 'success', 'message' => 'Akun dibuat']);
     }

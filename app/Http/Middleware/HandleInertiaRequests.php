@@ -28,6 +28,7 @@ class HandleInertiaRequests extends Middleware
                 'name' => $user->name,
                 'email' => $user->email,
                 'hide_amounts' => (bool) ($user->hide_amounts ?? false),
+                'is_admin' => (bool) ($user->is_admin ?? false), // only to show the menu row; the server checks access
             ] : null],
             'toast' => fn () => $request->session()->get('toast'),
             'new_location_id' => fn () => $request->session()->get('new_location_id'),

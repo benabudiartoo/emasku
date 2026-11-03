@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -26,6 +27,8 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy']);
+
+    Route::get('/admin', [AdminController::class, 'index'])->middleware('admin');
 
     Route::get('/mulai', fn () => Inertia::render('Mulai'));
     Route::get('/ringkasan', [SummaryController::class, 'index']);

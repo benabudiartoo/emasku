@@ -30,6 +30,7 @@ class LoginController extends Controller
         }
 
         $request->session()->regenerate();
+        Auth::user()->forceFill(['last_login_at' => now()])->save();
 
         return redirect()->intended(Item::query()->where('user_id', Auth::id())->exists() ? '/ringkasan' : '/mulai');
     }
