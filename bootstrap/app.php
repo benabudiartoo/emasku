@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Caddy on the host terminates HTTPS and proxies to the container, so trust its forwarded headers.
+        // Without this Laravel builds http:// URLs behind the proxy (mixed content, insecure cookies).
+        $middleware->trustProxies(at: '*');
         $middleware->web(append: [HandleInertiaRequests::class]);
         $middleware->redirectGuestsTo('/login');
         $middleware->redirectUsersTo('/ringkasan');

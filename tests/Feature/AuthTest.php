@@ -18,6 +18,12 @@ class AuthTest extends TestCase
         $this->actingAs(User::factory()->create())->get('/')->assertRedirect('/ringkasan');
     }
 
+    public function test_urls_follow_the_https_scheme_forwarded_by_the_proxy(): void
+    {
+        $this->withHeaders(['X-Forwarded-Proto' => 'https'])->get('/')
+            ->assertRedirect('https://localhost/login');
+    }
+
     public function test_register_creates_ulid_user_logs_in_and_goes_to_mulai(): void
     {
         $response = $this->post('/register', [
