@@ -4,7 +4,7 @@ import type { FormEvent } from 'react';
 import Field from '@/Components/Field';
 import AppLayout from '@/Layouts/AppLayout';
 import { gram } from '@/lib/format';
-import type { SharedProps, ZakatMadhhab, ZakatView } from '@/types';
+import type { PriceFeed, PriceQuote, SharedProps, ZakatMadhhab, ZakatView } from '@/types';
 import CaraHitungDrawer from './CaraHitungDrawer';
 import { ContributionList, Disclaimer, ResultPanel } from './parts';
 
@@ -16,6 +16,7 @@ type Props = {
     has_jewelry: boolean;
     result: ZakatView | null;
     form_errors: Record<string, string>;
+    price_feed: PriceFeed;
 };
 
 /** Only filled fields are sent, so the URL stays short and an empty price is simply absent. */
@@ -27,11 +28,35 @@ const toParams = (d: Inputs) => ({
     ...(d.jewelry_confirmed ? { jewelry_confirmed: '1' } : {}),
 });
 
-export default function Hitung({ madhhabs, inputs, has_jewelry, result, form_errors }: Props) {
+export default function Hitung({ madhhabs, inputs, has_jewelry, result, form_errors, price_feed }: Props) {
     const { errors } = usePage<SharedProps & { errors: Record<string, string> }>().props;
     const [data, setData] = useState<Inputs>(inputs);
     const [drawer, setDrawer] = useState(false);
     const [busy, setBusy] = useState(false);
+    const [feed, setFeed] = useState<PriceQuote | null>(null);
+    const [feedError, setFeedError] = useState<string | null>(null);
+    const [feedBusy, setFeedBusy] = useState(false);
+
+    // Fills the price field from the server lookup. The field stays editable and manual entry always works.
+    const fetchPrice = async () => {
+        setFeedBusy(true);
+        setFeedError(null);
+        try {
+            const res = await fetch('/zakat/harga-emas', { headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' });
+            if (res.status === 429) throw new Error('Terlalu sering mengambil harga. Tunggu sebentar atau isi manual.');
+            const body = await res.json().catch(() => null);
+            if (!res.ok || !body?.price_per_gram) throw new Error(body?.message ?? 'Harga tidak bisa diambil sekarang. Isi manual.');
+            setFeed(body as PriceQuote);
+            setData((d) => ({ ...d, price: (body as PriceQuote).price_per_gram }));
+        } catch (e) {
+            setFeed(null);
+            setFeedError(e instanceof Error && e.message ? e.message : 'Harga tidak bisa diambil sekarang. Isi manual.');
+        } finally {
+            setFeedBusy(false);
+        }
+    };
+
+    const fetchedAt = feed ? new Date(feed.fetched_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '';
 
     const allErrors = { ...form_errors, ...errors };
     // The result on screen belongs to the inputs last sent; saving is only offered while the form still matches.
@@ -79,7 +104,23 @@ export default function Hitung({ madhhabs, inputs, has_jewelry, result, form_err
                     </fieldset>
 
                     <Field id="price" label="Harga emas per gram (Rp, opsional)" error={allErrors.price} hint="Diisi bila Anda ingin melihat zakat dalam rupiah. Disimpan bersama perhitungan.">
-                        <input id="price" inputMode="decimal" value={data.price} placeholder="1500000" onChange={(e) => set('price', e.target.value)} className="field-input" />
+                        <div className="flex gap-2">
+                            <input id="price" inputMode="decimal" value={data.price} placeholder="1500000" onChange={(e) => set('price', e.target.value)} className="field-input min-w-0 flex-1" />
+                            {price_feed.available && (
+                                <button type="button" onClick={fetchPrice} disabled={feedBusy} className="btn btn-secondary mt-1.5 shrink-0">
+                                    {feedBusy ? 'Mengambil...' : 'Ambil harga terbaru'}
+                                </button>
+                            )}
+                        </div>
+                        {feedError && <p role="alert" className="mt-1 text-sm text-red-800">{feedError}</p>}
+                        {feed && (
+                            <p role="status" className="mt-1 text-xs leading-relaxed text-muted">
+                                Diambil pukul {fetchedAt}. Harga spot internasional ({feed.source}) dikonversi ke rupiah dengan kurs {feed.fx_source}{feed.fx_date ? ` (${feed.fx_date})` : ''}; bukan harga toko emas. Anda bisa mengubahnya.
+                            </p>
+                        )}
+                        {price_feed.available && (
+                            <p className="mt-1 text-xs text-muted">Sumber harga otomatis: <a href={price_feed.attribution.url} target="_blank" rel="noopener noreferrer" className="font-medium text-brand-dark underline underline-offset-2">{price_feed.attribution.name}</a></p>
+                        )}
                     </Field>
 
                     <Field id="haul_start" label="Awal haul (opsional)" error={allErrors.haul_start} hint="Bila diisi, menggantikan awal haul yang dihitung dari tanggal tiap barang.">

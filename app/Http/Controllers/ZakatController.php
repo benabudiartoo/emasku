@@ -76,6 +76,11 @@ class ZakatController extends Controller
             'has_jewelry' => $hasJewelry,
             'result' => $result,
             'form_errors' => $errors,
+            // The button is offered only when a key is set. The key itself never goes to the page.
+            'price_feed' => [
+                'available' => (bool) config('goldprice.enabled'),
+                'attribution' => config('goldprice.attribution'),
+            ],
         ]);
     }
 

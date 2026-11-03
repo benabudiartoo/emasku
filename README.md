@@ -30,6 +30,16 @@ php artisan serve
 
 Data demo fiktif (hanya non-produksi): `php artisan db:seed --class=DemoSeeder` lalu masuk dengan `demo@contoh.test` / `demo-12345`.
 
+## Harga emas otomatis (opsional)
+
+Di `/zakat/hitung`, tombol **Ambil harga terbaru** mengisi harga emas per gram dalam rupiah. Tanpa kunci API. Isi `GOLDPRICE_ENABLED=false` di `.env` untuk menyembunyikan tombol; harga tetap bisa diisi manual.
+
+- **Sumber:** emas dalam USD per troy ounce dari [Gold-API.com](https://gold-api.com) (gratis, tanpa kunci; dibagi 31,1034768 untuk per gram) dan kurs USD ke IDR dari [Frankfurter](https://frankfurter.dev) (tanpa kunci). Rupiah per gram = USD per gram x kurs, dihitung dengan bcmath.
+- **Bukan harga toko emas.** Ini harga spot internasional yang dikonversi; harga Antam atau toko emas bisa berbeda.
+- **Syarat Gold-API.com:** pemakaian komersial diizinkan dan atribusi tidak diwajibkan, tetapi IP yang mengirim beberapa permintaan per detik bisa diblokir. Satu cache bersama (60 detik) menjaga pemanggilan paling banyak sekali per menit, dan hasil ditampilkan sebagai "diambil pukul ..." bukan data langsung.
+- Bila sumber gagal (dimatikan, batas terlampaui, galat), tombol menampilkan pesan dan harga tetap diisi manual; tidak pernah ada angka nol atau data usang.
+- goldprice.org tidak dipakai (syarat penggunaannya melarang pengambilan otomatis) dan GoldPriceZ tidak dipakai (perlu kunci terdaftar).
+
 ## Pengujian
 
 Tes memakai PostgreSQL (database terpisah, mis. `catatan_emas_test`, diatur di `phpunit.xml`).

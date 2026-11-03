@@ -120,6 +120,19 @@ class ZakatPreviewTest extends TestCase
                 ->where('result.contributions', fn ($c) => collect($c)->where('included', false)->count() === 1));
     }
 
+    public function test_the_price_button_is_offered_unless_the_feed_is_switched_off(): void
+    {
+        config(['goldprice.enabled' => false]);
+        $this->get('/zakat/hitung')->assertInertia(fn (Assert $p) => $p
+            ->where('price_feed.available', false)
+            ->where('price_feed.attribution.name', 'Gold-API.com'));
+
+        config(['goldprice.enabled' => true]);
+        $this->get('/zakat/hitung')->assertInertia(fn (Assert $p) => $p
+            ->where('price_feed.available', true)
+            ->where('price_feed.attribution.url', 'https://gold-api.com'));
+    }
+
     public function test_guests_are_sent_to_login(): void
     {
         auth()->logout();

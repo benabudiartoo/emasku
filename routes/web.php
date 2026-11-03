@@ -3,6 +3,7 @@
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\GoldPriceController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\SettingsController;
@@ -30,6 +31,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/zakat', [ZakatController::class, 'index']);
     Route::get('/zakat/hitung', [ZakatController::class, 'hitung']);
+    Route::get('/zakat/harga-emas', [GoldPriceController::class, 'show'])->middleware('throttle:gold-price');
     Route::post('/zakat/periode', [ZakatController::class, 'store']);
     Route::get('/zakat/periode/{period}', [ZakatController::class, 'show']);
 

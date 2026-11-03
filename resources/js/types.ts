@@ -49,6 +49,20 @@ export type ZakatView = {
     references: ZakatReference[];
 };
 
+/** Whether the "Ambil harga terbaru" button is offered (a key is set), and the link the provider asks us to show. */
+export type PriceFeed = { available: boolean; attribution: { name: string; url: string } };
+
+/** What GET /zakat/harga-emas returns on success. */
+export type PriceQuote = {
+    price_per_gram: string;
+    currency: 'IDR';
+    source: string;
+    fx_source: string;
+    fx_date: string | null;
+    fetched_at: string;
+    note: string;
+};
+
 export type ZakatSummary = {
     id: string;
     valuation_date: string;
