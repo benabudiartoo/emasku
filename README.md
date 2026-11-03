@@ -40,6 +40,17 @@ Di `/zakat/hitung`, tombol **Ambil harga terbaru** mengisi harga emas per gram d
 - Bila sumber gagal (dimatikan, batas terlampaui, galat), tombol menampilkan pesan dan harga tetap diisi manual; tidak pernah ada angka nol atau data usang.
 - goldprice.org tidak dipakai (syarat penggunaannya melarang pengambilan otomatis) dan GoldPriceZ tidak dipakai (perlu kunci terdaftar).
 
+## Ekspor Excel dan PDF
+
+Tombol **Unduh Excel** dan **Unduh PDF** ada di Koleksi (mengikuti filter yang aktif), Ringkasan, daftar Zakat, dan detail satu perhitungan zakat.
+
+- Berkas selalu berisi angka lengkap walau "Sembunyikan nominal" aktif di layar, dan hanya memuat data pemilik yang sedang masuk.
+- Nilai yang tidak bisa dihitung ditulis "Data diperlukan" (atau "Perlu peninjauan" untuk zakat), tidak pernah nol. Barang titipan ditandai dan tidak ikut total.
+- Perhitungan zakat diambil dari angka yang tersimpan, bukan dihitung ulang. PDF dan Excel memuat keterangan bahwa ini alat bantu hitung, bukan fatwa.
+- Sel Excel yang berawalan `=`, `+`, `-`, atau `@` diberi tanda kutip di depan agar tidak dibaca sebagai rumus.
+- Rute: `/ekspor/koleksi.xlsx|pdf`, `/ekspor/ringkasan.xlsx|pdf`, `/ekspor/zakat.xlsx|pdf`, `/ekspor/zakat/{id}.xlsx|pdf`; dibatasi 20 unduhan per menit per pengguna (`config/export.php`).
+- Memakai paket `openspout/openspout` (Excel) dan `dompdf/dompdf` (PDF); keduanya tidak butuh ekstensi PHP tambahan di image Docker.
+
 ## Pengujian
 
 Tes memakai PostgreSQL (database terpisah, mis. `catatan_emas_test`, diatur di `phpunit.xml`).

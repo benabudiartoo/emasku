@@ -25,5 +25,8 @@ class AppServiceProvider extends ServiceProvider
         // The gold price lookup is cached and shared, so this only protects the endpoint itself.
         RateLimiter::for('gold-price', fn (Request $request) => Limit::perMinute((int) config('goldprice.throttle_per_minute'))
             ->by($request->user()?->id ?: $request->ip()));
+
+        RateLimiter::for('export', fn (Request $request) => Limit::perMinute((int) config('export.throttle_per_minute'))
+            ->by($request->user()?->id ?: $request->ip()));
     }
 }

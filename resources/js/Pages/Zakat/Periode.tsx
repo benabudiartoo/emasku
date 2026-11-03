@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
+import ExportButtons from '@/Components/ExportButtons';
 import AppLayout from '@/Layouts/AppLayout';
 import { dateId } from '@/lib/format';
 import type { ZakatView } from '@/types';
@@ -28,6 +29,7 @@ export default function Periode({ period }: { period: ZakatView }) {
                     <button type="button" onClick={() => setDrawer(true)} className="btn btn-secondary">Lihat cara hitung</button>
                     <Link href="/zakat/hitung" className="btn btn-secondary">Hitung ulang</Link>
                 </div>
+                <ExportButtons base={`/ekspor/zakat/${period.id}`} label="perhitungan zakat ini" />
                 <Disclaimer />
             </div>
             <CaraHitungDrawer open={drawer} onClose={() => setDrawer(false)} view={period} />

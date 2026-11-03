@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import { CaretRight, Plus, Warning } from '@phosphor-icons/react';
+import ExportButtons from '@/Components/ExportButtons';
 import PilihJenisModal from '@/Components/PilihJenisModal';
 import Secret from '@/Components/Secret';
 import AppLayout from '@/Layouts/AppLayout';
@@ -40,6 +41,8 @@ export default function Index({ has_any, active_count, bars, jewelry, pure_gold_
                 </div>
                 {has_any && <button type="button" onClick={() => setPick(true)} className="btn btn-primary hidden md:inline-flex"><Plus size={18} aria-hidden />Tambah emas</button>}
             </header>
+
+            {has_any && <div className="mt-4"><ExportButtons base="/ekspor/ringkasan" label="ringkasan" /></div>}
 
             {!has_any ? (
                 <div className="panel mt-8 p-8 text-center">

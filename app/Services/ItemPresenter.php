@@ -9,6 +9,30 @@ use App\Models\Item;
  */
 class ItemPresenter
 {
+    /**
+     * The owner's items as presented arrays, newest first, narrowed by the collection filters (jenis, lokasi, data).
+     * The collection page and the collection export both use this, so they always list the same items.
+     *
+     * @param  array{jenis?: ?string, lokasi?: ?string, data?: ?string}  $filters
+     * @return \Illuminate\Support\Collection<int, array>
+     */
+    public static function filtered(string $userId, array $filters, GoldCalculator $calc): \Illuminate\Support\Collection
+    {
+        return Item::where('user_id', $userId)->with('units', 'location')->latest()->get()
+            ->map(fn (Item $i) => self::present($i, $calc))
+            ->filter(fn (array $i) => match ($filters['jenis'] ?? null) {
+                'bar', 'jewelry' => $i['kind'] === $filters['jenis'],
+                default => true,
+            })
+            ->filter(fn (array $i) => ($filters['lokasi'] ?? null) ? $i['location_id'] === $filters['lokasi'] : true)
+            ->filter(fn (array $i) => match ($filters['data'] ?? null) {
+                'lengkap' => $i['status'] === 'complete',
+                'kurang' => $i['status'] === 'needs_data',
+                default => true,
+            })
+            ->values();
+    }
+
     public static function present(Item $item, GoldCalculator $calc): array
     {
         $net = $calc->netWeight($item);

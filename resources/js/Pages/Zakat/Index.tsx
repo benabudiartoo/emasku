@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import { CaretRight, Scales, Warning } from '@phosphor-icons/react';
+import ExportButtons from '@/Components/ExportButtons';
 import Secret from '@/Components/Secret';
 import AppLayout from '@/Layouts/AppLayout';
 import { dateId, gram, rupiah } from '@/lib/format';
@@ -50,7 +51,10 @@ export default function Index({ periods, madhhabs }: { periods: ZakatSummary[]; 
                     </Link>
 
                     <section aria-labelledby="periode-title" className="mt-8">
-                        <h2 id="periode-title" className="text-base font-semibold">Perhitungan tersimpan</h2>
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                            <h2 id="periode-title" className="text-base font-semibold">Perhitungan tersimpan</h2>
+                            <ExportButtons base="/ekspor/zakat" label="daftar zakat" />
+                        </div>
                         <ul className="panel mt-3 divide-y divide-line overflow-hidden">
                             {periods.map((p) => (
                                 <li key={p.id}>

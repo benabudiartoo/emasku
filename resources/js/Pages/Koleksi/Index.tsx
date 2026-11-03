@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Diamond, MapPin, Plus, Stack, WarningCircle } from '@phosphor-icons/react';
+import ExportButtons from '@/Components/ExportButtons';
 import PilihJenisModal from '@/Components/PilihJenisModal';
 import Secret from '@/Components/Secret';
 import AppLayout from '@/Layouts/AppLayout';
@@ -41,6 +42,8 @@ export default function Index({ items, filters, locations, has_any }: { items: I
                     {select('data', 'Status data', [['', 'Semua status'], ['lengkap', 'Lengkap'], ['kurang', 'Perlu dilengkapi']])}
                 </section>
             )}
+
+            {has_any && <div className="mt-4"><ExportButtons base="/ekspor/koleksi" query={filters} label="koleksi" /></div>}
 
             {!has_any ? (
                 <div className="panel mt-8 p-8 text-center">

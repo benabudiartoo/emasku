@@ -28,19 +28,7 @@ class ItemController extends Controller
         $userId = $request->user()->id;
         $filters = $request->only(['jenis', 'lokasi', 'data']);
 
-        $items = Item::where('user_id', $userId)->with('units', 'location')->latest()->get()
-            ->map(fn (Item $i) => ItemPresenter::present($i, $this->calc))
-            ->filter(fn (array $i) => match ($filters['jenis'] ?? null) {
-                'bar', 'jewelry' => $i['kind'] === $filters['jenis'],
-                default => true,
-            })
-            ->filter(fn (array $i) => ($filters['lokasi'] ?? null) ? $i['location_id'] === $filters['lokasi'] : true)
-            ->filter(fn (array $i) => match ($filters['data'] ?? null) {
-                'lengkap' => $i['status'] === 'complete',
-                'kurang' => $i['status'] === 'needs_data',
-                default => true,
-            })
-            ->values();
+        $items = ItemPresenter::filtered($userId, $filters, $this->calc);
 
         return Inertia::render('Koleksi/Index', [
             'items' => $items,
