@@ -10,21 +10,20 @@ use App\Models\Item;
 class ItemPresenter
 {
     /**
-     * The owner's items as presented arrays, newest first, narrowed by the collection filters (jenis, lokasi, data).
+     * The owner's items as presented arrays, newest first, narrowed by the collection filters (jenis, toko, data).
      * The collection page and the collection export both use this, so they always list the same items.
      *
-     * @param  array{jenis?: ?string, lokasi?: ?string, data?: ?string, toko?: ?string}  $filters
+     * @param  array{jenis?: ?string, data?: ?string, toko?: ?string}  $filters
      * @return \Illuminate\Support\Collection<int, array>
      */
     public static function filtered(string $userId, array $filters, GoldCalculator $calc): \Illuminate\Support\Collection
     {
-        return Item::where('user_id', $userId)->with('units', 'location')->latest()->get()
+        return Item::where('user_id', $userId)->with('units')->latest()->get()
             ->map(fn (Item $i) => self::present($i, $calc))
             ->filter(fn (array $i) => match ($filters['jenis'] ?? null) {
                 'bar', 'jewelry' => $i['kind'] === $filters['jenis'],
                 default => true,
             })
-            ->filter(fn (array $i) => ($filters['lokasi'] ?? null) ? $i['location_id'] === $filters['lokasi'] : true)
             ->filter(fn (array $i) => ($filters['toko'] ?? null) ? ($i['purchase_store'] ?? null) === $filters['toko'] : true)
             ->filter(fn (array $i) => match ($filters['data'] ?? null) {
                 'lengkap' => $i['status'] === 'complete',
@@ -53,7 +52,7 @@ class ItemPresenter
         $pure = $calc->pureGold($item);
         $round = fn (?string $v) => $v === null ? null : GoldCalculator::round($v, 4);
 
-        $item->loadMissing('units', 'location');
+        $item->loadMissing('units');
 
         return [
             ...$item->only([
@@ -62,12 +61,11 @@ class ItemPresenter
                 'purity_source', 'purity_input', 'purpose', 'acquisition_cost',
                 'purchase_store', 'resale_discount_percent',
                 'owned_since_certainty', 'haul_start_certainty', 'haul_start_note',
-                'notes', 'location_id',
+                'notes',
             ]),
             'owned_since' => $item->owned_since?->format('Y-m-d'),
             'haul_start' => $item->haul_start?->format('Y-m-d'),
             'created_at' => $item->created_at?->format('Y-m-d'),
-            'location' => $item->location ? ['id' => $item->location->id, 'name' => $item->location->name] : null,
             'units' => $item->units->map(fn ($u) => ['id' => $u->id, 'serial_number' => $u->serial_number, 'quantity' => $u->quantity])->values(),
             'pieces' => (int) $item->units->sum('quantity'),
             'purity_karat' => $item->purity_fraction === null ? null : GoldCalculator::round(bcmul((string) $item->purity_fraction, '24', GoldCalculator::SCALE), 4),

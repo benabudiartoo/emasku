@@ -67,16 +67,6 @@ class OwnerIsolationTest extends TestCase
         $this->assertFalse(Gate::forUser($this->a)->allows('view', $this->itemB));
     }
 
-    public function test_user_a_cannot_change_or_delete_user_b_location(): void
-    {
-        $this->actingAs($this->a);
-
-        $this->patch('/pengaturan/lokasi/'.$this->locationB->id, ['name' => 'Dibajak', 'kind' => 'home'])->assertNotFound();
-        $this->delete('/pengaturan/lokasi/'.$this->locationB->id)->assertNotFound();
-
-        $this->assertDatabaseHas('locations', ['id' => $this->locationB->id, 'name' => 'Brankas B']);
-    }
-
     public function test_user_a_cannot_download_delete_or_upload_to_user_b_photo(): void
     {
         $this->actingAs($this->a);

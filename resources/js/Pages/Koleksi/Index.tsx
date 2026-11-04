@@ -8,7 +8,7 @@ import AppLayout from '@/Layouts/AppLayout';
 import { gram, missingText, purityLabel, rupiahCents } from '@/lib/format';
 import type { Item } from '@/types';
 
-type Filters = { jenis?: string; lokasi?: string; data?: string; toko?: string };
+type Filters = { jenis?: string; data?: string; toko?: string };
 
 export default function Index({ items, filters, stores, has_any }: { items: Item[]; filters: Filters; stores: string[]; has_any: boolean }) {
     const [pick, setPick] = useState(false);

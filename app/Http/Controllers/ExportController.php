@@ -22,7 +22,7 @@ class ExportController extends Controller
 {
     public function collection(Request $request, string $format, CollectionReport $report): Response
     {
-        return $this->download($report->build($request->user()->id, $request->only(['jenis', 'lokasi', 'data', 'toko'])), $format);
+        return $this->download($report->build($request->user()->id, $request->only(['jenis', 'data', 'toko'])), $format);
     }
 
     public function summary(Request $request, string $format, SummaryReport $report): Response

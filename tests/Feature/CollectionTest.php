@@ -92,13 +92,6 @@ class CollectionTest extends TestCase
         $this->assertSame(0, Item::count());
     }
 
-    public function test_location_of_another_owner_is_rejected(): void
-    {
-        $theirs = Location::factory()->create(['user_id' => User::factory()->create()->id]);
-
-        $this->post('/koleksi', $this->barPayload(['location_id' => $theirs->id]))->assertSessionHasErrors('location_id');
-    }
-
     public function test_held_for_others_needs_a_name_and_is_not_counted(): void
     {
         $this->post('/koleksi', $this->barPayload(['ownership' => 'held_for_others']))->assertSessionHasErrors('held_for');
@@ -167,26 +160,6 @@ class CollectionTest extends TestCase
         $this->get('/koleksi')->assertInertia(fn (Assert $p) => $p->has('items', 0)->where('has_any', false));
     }
 
-    public function test_locations_crud_and_new_location_is_flashed(): void
-    {
-        $this->post('/pengaturan/lokasi', ['name' => 'Brankas rumah', 'kind' => 'safe'])->assertSessionHas('new_location_id');
-        $location = Location::firstOrFail();
-        $this->assertSame($this->user->id, $location->user_id);
-
-        $this->post('/pengaturan/lokasi', ['name' => 'Brankas rumah', 'kind' => 'safe'])->assertSessionHasErrors('name');
-
-        $this->patch('/pengaturan/lokasi/'.$location->id, ['name' => 'Brankas kamar', 'kind' => 'safe']);
-        $this->assertSame('Brankas kamar', $location->refresh()->name);
-
-        $this->post('/koleksi', $this->barPayload(['location_id' => $location->id]));
-        $this->delete('/pengaturan/lokasi/'.$location->id)->assertSessionHas('toast.type', 'error');
-        $this->assertSame(1, Location::count());
-
-        Item::query()->delete();
-        $this->delete('/pengaturan/lokasi/'.$location->id);
-        $this->assertSame(0, Location::count());
-    }
-
     public function test_settings_saves_hide_amounts_default(): void
     {
         $this->patch('/pengaturan', ['hide_amounts' => true])->assertSessionHas('toast.message', 'Pengaturan disimpan');
@@ -195,7 +168,7 @@ class CollectionTest extends TestCase
 
     public function test_pages_render(): void
     {
-        foreach (['/koleksi/baru/batangan', '/koleksi/baru/perhiasan', '/koleksi/lama', '/menu', '/pengaturan', '/pengaturan/lokasi'] as $url) {
+        foreach (['/koleksi/baru/batangan', '/koleksi/baru/perhiasan', '/koleksi/lama', '/menu', '/pengaturan'] as $url) {
             $this->get($url)->assertOk();
         }
         $this->get('/koleksi/baru/koin')->assertNotFound();

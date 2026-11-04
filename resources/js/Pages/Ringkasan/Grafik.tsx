@@ -57,10 +57,6 @@ export default function Grafik({ charts }: { charts: SummaryChartsData }) {
                     <BarList rows={charts.by_kind.map((r) => ({ label: r.label, value: r.pure_gold_g }))} format={g} head={['Jenis', 'Emas murni']} />
                 </ChartCard>
 
-                <ChartCard title="Emas murni per lokasi" subtitle="Dalam gram; lima terbesar, sisanya digabung">
-                    <BarList rows={charts.by_location.map((r) => ({ label: r.label, value: r.pure_gold_g }))} format={g} head={['Lokasi', 'Emas murni']} />
-                </ChartCard>
-
                 <ChartCard title="Pertumbuhan total berat emas" subtitle="Total gram (berat bersih, bukan hanya emas murni) menurut tanggal dimiliki sejak">
                     {growth.points.length === 0 ? (
                         <p className="text-sm text-muted">Belum ada barang dengan tanggal dimiliki sejak, jadi pertumbuhan belum bisa digambar.</p>

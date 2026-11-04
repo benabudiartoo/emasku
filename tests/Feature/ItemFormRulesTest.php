@@ -79,14 +79,4 @@ class ItemFormRulesTest extends TestCase
         $this->assertSame('purchase', $item->acquisition_method);
         $this->assertNull($item->owned_since_note);
     }
-
-    public function test_editing_keeps_the_location_the_form_no_longer_sends(): void
-    {
-        $place = \App\Models\Location::factory()->create(['user_id' => $this->user->id]);
-        $item = Item::factory()->create(['user_id' => $this->user->id, 'location_id' => $place->id]);
-
-        $this->patch("/koleksi/{$item->id}", $this->bar(['name' => 'Diubah']))->assertSessionHasNoErrors();
-
-        $this->assertSame($place->id, $item->fresh()->location_id);
-    }
 }

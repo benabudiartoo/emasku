@@ -5,7 +5,6 @@ export type AuthUser = { id: string; name: string; email: string; hide_amounts: 
 export type SharedProps = {
     auth: { user: AuthUser | null };
     toast: Toast | null;
-    new_location_id: string | null;
     [key: string]: unknown;
 };
 
@@ -75,7 +74,6 @@ export type ZakatSummary = {
     zakat_rupiah: string | null;
 };
 
-export type Loc ={ id: string; name: string; kind: string; items_count?: number };
 
 export type ItemUnit = { id: string; serial_number: string | null; quantity: number };
 
@@ -110,8 +108,6 @@ export type Item = {
     haul_start_certainty: string | null;
     haul_start_note: string | null;
     notes: string | null;
-    location_id: string | null;
-    location: { id: string; name: string } | null;
     created_at: string;
     units: ItemUnit[];
     pieces: number;
@@ -127,7 +123,6 @@ export type ChartRow = { label: string; pure_gold_g: string };
 
 export type SummaryChartsData = {
     by_kind: ChartRow[];
-    by_location: ChartRow[];
     growth: {
         points: { date: string; cumulative_g: string }[];
         undated_count: number;

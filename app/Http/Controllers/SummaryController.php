@@ -18,7 +18,7 @@ class SummaryController extends Controller
 
     public function index(Request $request): Response
     {
-        $items = Item::where('user_id', $request->user()->id)->with('units', 'location')->get();
+        $items = Item::where('user_id', $request->user()->id)->with('units')->get();
         $summary = $this->calc->summarize($items);
         $weight = $this->calc->totalNet($items);
 
@@ -53,7 +53,7 @@ class SummaryController extends Controller
     {
         abort_unless(in_array($metric, ['barang', 'emas-murni'], true), 404);
 
-        $owned = Item::where('user_id', $request->user()->id)->where('ownership', 'own')->with('units', 'location')->orderBy('name')->get();
+        $owned = Item::where('user_id', $request->user()->id)->where('ownership', 'own')->with('units')->orderBy('name')->get();
         $summary = $this->calc->summarize($owned);
 
         $present = fn ($items) => collect($items)->map(fn (Item $i) => ItemPresenter::present($i, $this->calc))->values();

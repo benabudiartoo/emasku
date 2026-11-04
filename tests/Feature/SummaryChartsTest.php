@@ -67,28 +67,6 @@ class SummaryChartsTest extends TestCase
         $this->assertSame(['Batangan'], array_column($this->charts()['by_kind'], 'label'));
     }
 
-    public function test_locations_show_the_five_largest_then_the_rest_grouped(): void
-    {
-        foreach ([70, 60, 50, 40, 30, 20, 10] as $i => $grams) {
-            $place = Location::factory()->create(['user_id' => $this->user->id, 'name' => "Lokasi {$grams}"]);
-            $this->bars($this->user, "{$grams}.0000", 1, null, ['location_id' => $place->id]);
-        }
-        $this->bars($this->user, '5.0000', 1); // no location
-
-        $rows = $this->charts()['by_location'];
-
-        $this->assertSame(['Lokasi 70', 'Lokasi 60', 'Lokasi 50', 'Lokasi 40', 'Lokasi 30', 'Lainnya'], array_column($rows, 'label'));
-        // Lainnya = Lokasi 20 (19.998) + Lokasi 10 (9.999) + Tanpa lokasi (4.9995)
-        $this->assertSame('34.9965', end($rows)['pure_gold_g']);
-    }
-
-    public function test_items_without_a_location_are_shown_as_tanpa_lokasi(): void
-    {
-        $this->dueBars($this->user);
-
-        $this->assertSame([['label' => 'Tanpa lokasi', 'pure_gold_g' => '99.9900']], $this->charts()['by_location']);
-    }
-
     public function test_growth_is_cumulative_in_date_order_and_counts_undated_and_approximate(): void
     {
         $this->bars($this->user, '10.0000', 2, '2025-03-01', ['owned_since_certainty' => 'approximate']); // 20 g of metal
@@ -147,7 +125,6 @@ class SummaryChartsTest extends TestCase
         $charts = $this->charts();
 
         $this->assertSame([], $charts['by_kind']);
-        $this->assertSame([], $charts['by_location']);
         $this->assertSame([], $charts['growth']['points']);
     }
 

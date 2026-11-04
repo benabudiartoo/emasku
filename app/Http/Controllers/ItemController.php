@@ -29,14 +29,13 @@ class ItemController extends Controller
     public function index(Request $request): Response
     {
         $userId = $request->user()->id;
-        $filters = $request->only(['jenis', 'lokasi', 'data', 'toko']);
+        $filters = $request->only(['jenis', 'data', 'toko']);
 
         $items = ItemPresenter::filtered($userId, $filters, $this->calc);
 
         return Inertia::render('Koleksi/Index', [
             'items' => $items,
             'filters' => $filters,
-            'locations' => $this->locations($userId),
             'stores' => Item::where('user_id', $userId)->whereNotNull('purchase_store')->distinct()->orderBy('purchase_store')->pluck('purchase_store')->values(),
             'has_any' => Item::where('user_id', $userId)->exists(),
         ]);
@@ -145,11 +144,6 @@ class ItemController extends Controller
         return redirect('/koleksi')->with('toast', ['type' => 'success', 'message' => 'Barang dihapus']);
     }
 
-    private function locations(string $userId)
-    {
-        return \App\Models\Location::where('user_id', $userId)->orderBy('name')->get(['id', 'name', 'kind']);
-    }
-
     /** @return array<string, mixed> */
     private function validated(Request $request, string $kind, bool $old): array
     {
@@ -164,8 +158,6 @@ class ItemController extends Controller
         $rules = [
             'name' => ['required', 'string', 'max:160'],
             'brand' => ['nullable', Rule::in(self::BRANDS)],
-            // A location must belong to this owner, or it could point at someone else's record.
-            'location_id' => ['nullable', Rule::exists('locations', 'id')->where('user_id', $request->user()->id)],
             'ownership' => ['required', 'in:own,held_for_others'],
             'held_for' => ['nullable', 'required_if:ownership,held_for_others', 'string', 'max:160'],
             'purity_input' => ['nullable', 'numeric'],
@@ -224,7 +216,7 @@ class ItemController extends Controller
     private function itemAttributes(array $data, string $kind): array
     {
         $attributes = collect($data)->only([
-            'name', 'brand', 'location_id', 'ownership', 'held_for', 'purity_fraction', 'purity_source', 'purity_input',
+            'name', 'brand', 'ownership', 'held_for', 'purity_fraction', 'purity_source', 'purity_input',
             'acquisition_cost', 'purchase_store', 'resale_discount_percent', 'owned_since', 'owned_since_certainty',
             'haul_start', 'haul_start_certainty', 'haul_start_note', 'notes',
         ])->all();

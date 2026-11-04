@@ -16,7 +16,7 @@ class CollectionReport
 
     public function __construct(private GoldCalculator $calc) {}
 
-    /** @param  array{jenis?: ?string, lokasi?: ?string, data?: ?string, toko?: ?string}  $filters */
+    /** @param  array{jenis?: ?string, data?: ?string, toko?: ?string}  $filters */
     public function build(string $userId, array $filters): Report
     {
         $items = ItemPresenter::filtered($userId, $filters, $this->calc);
@@ -47,7 +47,7 @@ class CollectionReport
             filename: 'koleksi-emas-'.Fmt::today(),
             facts: [
                 'Tanggal' => Fmt::date(Fmt::today()),
-                'Filter' => $this->filterText($filters, $userId),
+                'Filter' => $this->filterText($filters),
                 'Jumlah barang' => (string) $items->count(),
                 'Total emas murni milik sendiri (g)' => Fmt::gram(GoldCalculator::round($summary['pure_gold'], 4)),
                 'Barang data kurang' => (string) $summary['incomplete'],
@@ -122,7 +122,7 @@ class CollectionReport
         return $rows;
     }
 
-    private function filterText(array $filters, string $userId): string
+    private function filterText(array $filters): string
     {
         $parts = [];
         foreach (['jenis', 'data'] as $key) {
@@ -132,12 +132,6 @@ class CollectionReport
         }
         if ($filters['toko'] ?? null) {
             $parts[] = 'Toko '.$filters['toko'];
-        }
-        if ($filters['lokasi'] ?? null) {
-            $name = \App\Models\Location::where('user_id', $userId)->whereKey($filters['lokasi'])->value('name');
-            if ($name) {
-                $parts[] = 'Lokasi '.$name;
-            }
         }
 
         return $parts === [] ? 'Semua barang' : implode(', ', $parts);

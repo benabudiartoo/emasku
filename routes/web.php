@@ -8,7 +8,6 @@ use App\Http\Controllers\ExportController;
 use App\Http\Controllers\GoldPriceController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\ItemController;
-use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PortfolioValueController;
 use App\Http\Controllers\ResaleEstimateController;
 use App\Http\Controllers\SettingsController;
@@ -72,11 +71,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/menu', fn () => Inertia::render('Menu'));
     Route::get('/pengaturan', [SettingsController::class, 'show']);
     Route::patch('/pengaturan', [SettingsController::class, 'update']);
-    Route::get('/pengaturan/lokasi', [LocationController::class, 'index']);
-    Route::post('/pengaturan/lokasi', [LocationController::class, 'store']);
-
-    Route::patch('/pengaturan/lokasi/{location}', [LocationController::class, 'update']);
-    Route::delete('/pengaturan/lokasi/{location}', [LocationController::class, 'destroy']);
 
     Route::post('/koleksi/{item}/lampiran', [AttachmentController::class, 'store']);
     Route::get('/lampiran/{attachment}', [AttachmentController::class, 'show']);
