@@ -189,10 +189,7 @@ class ItemController extends Controller
         if ($kind === 'bar') {
             $rules += [
                 'unit_weight_g' => ['nullable', 'numeric', 'gt:0', 'max:1000000'],
-                'unit_mode' => ['required', 'in:serial,lot'],
-                'serials' => ['required_if:unit_mode,serial', 'array', 'max:200'],
-                'serials.*' => ['nullable', 'string', 'max:120'],
-                'quantity' => ['required_if:unit_mode,lot', 'nullable', 'integer', 'min:1', 'max:100000'],
+                'quantity' => ['required', 'integer', 'min:1', 'max:100000'],
             ];
         } else {
             $rules += [
@@ -255,16 +252,13 @@ class ItemController extends Controller
             return;
         }
 
-        $item->units()->delete();
-
-        if ($data['unit_mode'] === 'lot') {
-            $item->units()->create(['serial_number' => null, 'quantity' => (int) $data['quantity']]);
-
+        // Older items may still carry serial numbers; leave them alone while the number of pieces is unchanged.
+        $pieces = (int) $data['quantity'];
+        if ($item->units()->whereNotNull('serial_number')->exists() && (int) $item->units()->sum('quantity') === $pieces) {
             return;
         }
 
-        foreach ($data['serials'] as $serial) {
-            $item->units()->create(['serial_number' => $serial === null || $serial === '' ? null : $serial, 'quantity' => 1]);
-        }
+        $item->units()->delete();
+        $item->units()->create(['serial_number' => null, 'quantity' => $pieces]);
     }
 }

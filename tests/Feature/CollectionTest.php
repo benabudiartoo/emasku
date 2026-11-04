@@ -29,7 +29,7 @@ class CollectionTest extends TestCase
     {
         return $over + [
             'kind' => 'bar', 'name' => 'Antam 10 g', 'ownership' => 'own', 
-            'owned_since_certainty' => 'exact', 'unit_weight_g' => '10', 'unit_mode' => 'serial', 'serials' => ['A1', 'A2'],
+            'owned_since_certainty' => 'exact', 'unit_weight_g' => '10', 'quantity' => 2,
             'purity_input' => '24',
         ];
     }
@@ -43,19 +43,19 @@ class CollectionTest extends TestCase
         ];
     }
 
-    public function test_serial_bar_stores_one_unit_per_serial_and_decimal_comma(): void
+    public function test_bar_stores_its_pieces_as_one_unit(): void
     {
         $this->post('/koleksi', $this->barPayload())->assertSessionHasNoErrors();
 
         $item = Item::firstOrFail();
         $this->assertSame($this->user->id, $item->user_id);
-        $this->assertSame(2, $item->units()->count());
+        $this->assertSame(2, (int) $item->units()->sum('quantity'));
         $this->assertSame('1.000000', $item->purity_fraction);
     }
 
     public function test_identical_lot_stores_one_unit_with_quantity(): void
     {
-        $this->post('/koleksi', $this->barPayload(['unit_mode' => 'lot', 'quantity' => 5]))->assertSessionHasNoErrors();
+        $this->post('/koleksi', $this->barPayload(['quantity' => 5]))->assertSessionHasNoErrors();
 
         $units = Item::firstOrFail()->units;
         $this->assertCount(1, $units);
@@ -140,7 +140,7 @@ class CollectionTest extends TestCase
         $this->post('/koleksi', $this->barPayload());
         $item = Item::firstOrFail();
 
-        $this->patch('/koleksi/'.$item->id, $this->barPayload(['kind' => 'jewelry', 'unit_mode' => 'lot', 'quantity' => 3, 'name' => 'Antam 20 g']))
+        $this->patch('/koleksi/'.$item->id, $this->barPayload(['kind' => 'jewelry', 'quantity' => 3, 'name' => 'Antam 20 g']))
             ->assertRedirect('/koleksi/'.$item->id);
 
         $item->refresh();

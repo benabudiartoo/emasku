@@ -7,7 +7,7 @@ Aplikasi web pribadi (PWA, berbahasa Indonesia) untuk mencatat emas batangan dan
 ## Fitur Phase 0
 
 - Daftar dan masuk dengan akun sendiri; data terisolasi per pemilik (policy pada halaman, API, dan lampiran).
-- Batangan (per keping bernomor seri atau lot identik) dan perhiasan (berat kotor, batu: tanpa/diketahui/belum diketahui, berat bersih, kadar permil/persen/karat).
+- Batangan (berat per keping dan jumlah keping) dan perhiasan (berat kotor, batu: tanpa/diketahui/belum diketahui, berat bersih, kadar dalam karat).
 - Emas murni = berat bersih x kadar, dihitung dengan bcmath (tanpa float). Nilai yang kosong tidak pernah dianggap nol: tampil **Data diperlukan** dan tidak ikut total.
 - Lokasi simpan bernama, kepemilikan milik sendiri atau titipan (titipan tidak dihitung), tanggal mulai dimiliki dengan tingkat kepastian.
 - Ringkasan dengan rincian per angka, mode **Sembunyikan nominal**, dan onboarding.

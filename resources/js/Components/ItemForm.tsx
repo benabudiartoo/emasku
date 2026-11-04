@@ -1,7 +1,6 @@
 import { router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
-import { Plus, Trash } from '@phosphor-icons/react';
 import Field from '@/Components/Field';
 import Modal from '@/Components/Modal';
 import { DATE_CERTAINTY, inputNumber } from '@/lib/format';
@@ -32,9 +31,7 @@ export default function ItemForm({ kind: initialKind, old = false, item, cancelH
         ownership: item?.ownership ?? 'own',
         held_for: item?.held_for ?? '',
         unit_weight_g: inputNumber(item?.unit_weight_g ?? null),
-        unit_mode: item && item.units.length === 1 && item.units[0].serial_number === null && item.units[0].quantity > 1 ? 'lot' : 'serial',
-        serials: item?.kind === 'bar' && item.units.length ? item.units.map((u) => u.serial_number ?? '') : [''],
-        quantity: String(item?.kind === 'bar' && item.units.length === 1 ? item.units[0].quantity : 1),
+        quantity: String(item?.kind === 'bar' ? item.pieces : 1),
         jewelry_type: item?.jewelry_type ?? '',
         gross_weight_g: inputNumber(item?.gross_weight_g ?? null),
         stone_state: item?.stone_state ?? 'unknown',
@@ -110,33 +107,7 @@ export default function ItemForm({ kind: initialKind, old = false, item, cancelH
                             <Field id="unit_weight_g" label="Berat per keping (gram)" error={err('unit_weight_g')} hint="Kosongkan bila belum tahu; angka akan ditandai Data diperlukan.">
                                 {text('unit_weight_g', { inputMode: 'decimal', placeholder: '10' })}
                             </Field>
-                            <div role="group" aria-label="Cara mencatat keping" className="inline-flex rounded-xl border border-line bg-white p-1">
-                                {([['serial', 'Per keping bernomor seri'], ['lot', 'Lot identik']] as const).map(([v, l]) => (
-                                    <button key={v} type="button" aria-pressed={data.unit_mode === v} onClick={() => setData('unit_mode', v)}
-                                        className={`h-9 rounded-lg px-3 text-sm font-medium ${data.unit_mode === v ? 'bg-brand text-white' : 'text-muted'}`}>{l}</button>
-                                ))}
-                            </div>
-                            {data.unit_mode === 'lot' ? (
-                                <Field id="quantity" label="Jumlah keping" error={err('quantity')}>{text('quantity', { inputMode: 'numeric', placeholder: '5' })}</Field>
-                            ) : (
-                                <div>
-                                    <span className="block text-sm font-medium">Nomor seri (satu baris per keping)</span>
-                                    {data.serials.map((s, i) => (
-                                        <div key={i} className="mt-1.5 flex gap-2">
-                                            <input aria-label={`Nomor seri keping ${i + 1}`} value={s} placeholder="Boleh dikosongkan"
-                                                onChange={(e) => setData('serials', data.serials.map((x, j) => (j === i ? e.target.value : x)))}
-                                                className="field-input !mt-0" />
-                                            {data.serials.length > 1 && (
-                                                <button type="button" aria-label={`Hapus keping ${i + 1}`} onClick={() => setData('serials', data.serials.filter((_, j) => j !== i))}
-                                                    className="btn btn-secondary !px-3"><Trash size={18} aria-hidden /></button>
-                                            )}
-                                        </div>
-                                    ))}
-                                    {err('serials') && <p role="alert" className="mt-1 text-sm text-red-800">{err('serials')}</p>}
-                                    <button type="button" onClick={() => setData('serials', [...data.serials, ''])} className="btn btn-secondary mt-2"><Plus size={16} aria-hidden />Tambah keping</button>
-                                    <p className="mt-1 text-xs text-muted">Nomor seri yang sama pada dua keping hanya diperingatkan, tidak ditolak.</p>
-                                </div>
-                            )}
+                            <Field id="quantity" label="Jumlah keping" error={err('quantity')}>{text('quantity', { inputMode: 'numeric', placeholder: '1' })}</Field>
                         </>
                     ) : (
                         <>

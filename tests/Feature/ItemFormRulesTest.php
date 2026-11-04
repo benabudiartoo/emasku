@@ -24,7 +24,7 @@ class ItemFormRulesTest extends TestCase
     private function bar(array $over = []): array
     {
         return $over + ['kind' => 'bar', 'name' => 'Batangan', 'ownership' => 'own', 'owned_since_certainty' => 'exact',
-            'unit_weight_g' => '10', 'unit_mode' => 'lot', 'quantity' => 1, 'purity_input' => '24'];
+            'unit_weight_g' => '10', 'quantity' => 1, 'purity_input' => '24'];
     }
 
     private function ring(array $over = []): array
