@@ -37,6 +37,8 @@ export default function Impor({ max_mb, max_rows }: { max_mb: number; max_rows: 
                     <li>Barang yang sama dengan yang sudah ada ditandai dan tidak dicentang.</li>
                 </ul>
                 <p className="mt-3 text-sm text-muted">Batas: berkas .xlsx maksimal {max_mb} MB dan {max_rows} baris per sheet. Barang hasil impor bisa diubah lewat form biasa.</p>
+                <a href="/koleksi/impor/contoh.xlsx" download className="btn btn-secondary mt-4">Unduh contoh berkas Excel</a>
+                <p className="mt-2 text-xs text-muted">Berisi tiga baris contoh dan sheet Petunjuk. Hapus baris contoh, isi data Anda, lalu unggah di sini.</p>
             </section>
         </AppLayout>
     );

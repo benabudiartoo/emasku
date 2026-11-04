@@ -57,6 +57,7 @@ Route::middleware('auth')->group(function () {
 
     // Import from Excel. These sit above /koleksi/{item}, which would otherwise swallow "impor".
     Route::get('/koleksi/impor', [ImportController::class, 'create']);
+    Route::get('/koleksi/impor/contoh.xlsx', [ImportController::class, 'template']);
     Route::post('/koleksi/impor', [ImportController::class, 'store'])->middleware('throttle:10,1');
     Route::get('/koleksi/impor/{token}', [ImportController::class, 'show']);
     Route::post('/koleksi/impor/{token}', [ImportController::class, 'save']);

@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Services\Import\ExcelItemImporter;
 use App\Services\Import\ImportException;
 use App\Services\Import\ImportPreview;
+use App\Services\Import\ImportTemplate;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -23,6 +25,16 @@ class ImportController extends Controller
     public function create(): Response
     {
         return Inertia::render('Koleksi/Impor', ['max_mb' => self::MAX_KB / 1024, 'max_rows' => ExcelItemImporter::MAX_ROWS]);
+    }
+
+    /** The example workbook: the format the importer reads, with three made-up rows and a Petunjuk sheet. */
+    public function template(ImportTemplate $template): HttpResponse
+    {
+        return response($template->render(), 200, [
+            'Content-Type' => ImportTemplate::MIME,
+            'Content-Disposition' => 'attachment; filename="'.ImportTemplate::FILENAME.'"',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     public function store(Request $request, ExcelItemImporter $importer): RedirectResponse

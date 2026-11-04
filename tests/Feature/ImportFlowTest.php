@@ -64,6 +64,55 @@ class ImportFlowTest extends TestCase
         $this->delete('/koleksi/impor/abc')->assertRedirect('/login');
     }
 
+    public function test_the_example_workbook_is_for_signed_in_owners_only(): void
+    {
+        auth()->logout();
+
+        $this->get('/koleksi/impor/contoh.xlsx')->assertRedirect('/login');
+    }
+
+    public function test_the_example_workbook_downloads_and_matches_what_the_importer_reads(): void
+    {
+        $response = $this->get('/koleksi/impor/contoh.xlsx')->assertOk();
+
+        $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->assertHeader('Content-Disposition', 'attachment; filename="contoh-impor-perhiasan.xlsx"');
+        $this->assertSame('PK', substr($response->getContent(), 0, 2));
+
+        // Upload the downloaded example itself: it must preview cleanly, with every example row ok and nothing saved.
+        $path = tempnam(sys_get_temp_dir(), 'contoh').'.xlsx';
+        file_put_contents($path, $response->getContent());
+        $this->workbookFiles[] = $path;
+
+        $token = basename($this->post('/koleksi/impor', ['file' => $this->upload($path, 'contoh-impor-perhiasan.xlsx')])->assertSessionHasNoErrors()->headers->get('Location'));
+
+        $this->get("/koleksi/impor/{$token}")->assertInertia(fn (Assert $p) => $p
+            ->where('sheet', 'Daftar Perhiasan')
+            ->where('counts', ['ok' => 3])
+            ->has('sheets', 1) // the Petunjuk sheet has no header the importer recognizes, so it is not offered
+            ->where('rows.0.name', 'Gelang kaku contoh')
+            ->where('rows.0.store', 'Toko Emas Contoh')
+            ->where('rows.0.jewelry_type', 'gelang')
+            ->where('rows.0.owned_since', '2024-03-15')
+            ->where('rows.0.purity_source', 'karat')
+            ->where('rows.0.net_weight_g', '6.08')
+            ->where('rows.0.acquisition_cost', '4895000')
+            ->where('rows.0.resale_discount_percent', '10.00')
+            ->where('rows.1.resale_discount_percent', '15.00')
+            ->where('rows.2.purity_source', 'permil')
+            ->where('rows.2.resale_discount_percent', null)
+            ->where('rows', fn ($rows) => collect($rows)->every(fn ($r) => $r['selected'] === true && $r['notes'] === [])));
+
+        $this->assertSame(0, Item::count());
+    }
+
+    public function test_the_upload_page_links_to_the_example(): void
+    {
+        // The link is part of the page component; the route it points to must exist for owners.
+        $this->get('/koleksi/impor')->assertOk();
+        $this->get('/koleksi/impor/contoh.xlsx')->assertOk();
+    }
+
     public function test_the_upload_page_opens_with_the_limits(): void
     {
         $this->get('/koleksi/impor')->assertOk()->assertInertia(fn (Assert $p) => $p

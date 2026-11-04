@@ -61,6 +61,7 @@ Koleksi, lalu **Impor Excel** (atau kartu di halaman Mulai): unggah `.xlsx`, lih
 - **Duplikat** (nama, tanggal, berat bersih, dan harga sama dengan barang yang sudah ada atau baris sebelumnya) ditandai dan tidak dicentang.
 - **Batas dan keamanan:** `.xlsx` saja, maksimal 2 MB dan 500 baris per sheet. Berkas hanya dibaca sebagai teks; rumus Excel tidak dijalankan. Pratinjau disimpan di server selama 30 menit dan terikat pada pengguna yang mengunggah; yang disimpan adalah hasil baca di server, bukan data dari peramban. Penyimpanan semua baris dilakukan dalam satu transaksi.
 - Barang hasil impor bisa diubah lewat form biasa.
+- **Contoh berkas:** halaman impor punya tombol "Unduh contoh berkas Excel" (`/koleksi/impor/contoh.xlsx`): sheet "Daftar Perhiasan" berisi judul kolom yang dikenali dan tiga baris contoh fiktif, ditambah sheet "Petunjuk". Berkas contoh dibuat otomatis oleh aplikasi sehingga selalu cocok dengan format yang dibaca pembaca impor, dan lolos pratinjau tanpa peringatan.
 
 ## Halaman admin ringan
 
