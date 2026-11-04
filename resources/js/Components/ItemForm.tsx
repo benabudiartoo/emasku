@@ -1,29 +1,25 @@
-import { router, useForm, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { router, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import { Plus, Trash } from '@phosphor-icons/react';
 import Field from '@/Components/Field';
-import LocationModal from '@/Components/LocationModal';
 import Modal from '@/Components/Modal';
-import { ACQUISITION_LABEL, DATE_CERTAINTY, inputNumber } from '@/lib/format';
-import type { Item, Loc, SharedProps } from '@/types';
+import { DATE_CERTAINTY, inputNumber } from '@/lib/format';
+import type { Item } from '@/types';
 
 type Props = {
     kind: 'bar' | 'jewelry';
     old?: boolean;
     item?: Item;
-    locations: Loc[];
     cancelHref: string;
 };
 
 const JEWELRY_TYPES: Record<string, string> = { cincin: 'Cincin', kalung: 'Kalung', gelang: 'Gelang', anting: 'Anting', liontin: 'Liontin', lainnya: 'Lainnya' };
 const PURPOSES: Record<string, string> = { worn: 'Dipakai', investment: 'Simpanan / investasi', undecided: 'Belum ditentukan' };
-const PURITY_UNITS: Record<string, string> = { permil: 'Permil (‰), mis. 999,9 atau 750', percent: 'Persen (%), mis. 75', karat: 'Karat, mis. 18 (perkiraan)' };
+const BRANDS = ['Antam', 'Galeri 24', 'Lotus Archi', 'UBS', 'Hartadinata', 'Lainnya'];
 
-export default function ItemForm({ kind: initialKind, old = false, item, locations, cancelHref }: Props) {
+export default function ItemForm({ kind: initialKind, old = false, item, cancelHref }: Props) {
     const editing = !!item;
-    const page = usePage<SharedProps>();
-    const [locOpen, setLocOpen] = useState(false);
     const [discardOpen, setDiscardOpen] = useState(false);
 
     const form = useForm({
@@ -31,8 +27,8 @@ export default function ItemForm({ kind: initialKind, old = false, item, locatio
         old,
         then: 'done',
         name: item?.name ?? '',
-        brand: item?.brand ?? '',
-        location_id: item?.location_id ?? '',
+        // A brand typed freely before the list existed is shown as "Lainnya" rather than dropped.
+        brand: item?.brand ? (BRANDS.includes(item.brand) ? item.brand : 'Lainnya') : '',
         ownership: item?.ownership ?? 'own',
         held_for: item?.held_for ?? '',
         unit_weight_g: inputNumber(item?.unit_weight_g ?? null),
@@ -45,15 +41,13 @@ export default function ItemForm({ kind: initialKind, old = false, item, locatio
         stone_weight_g: inputNumber(item?.stone_weight_g ?? null),
         net_weight_g: inputNumber(item?.net_weight_g ?? null),
         purpose: item?.purpose ?? 'undecided',
-        purity_source: item?.purity_source ?? 'permil',
-        purity_input: inputNumber(item?.purity_input ?? null),
-        acquisition_method: item?.acquisition_method ?? (old ? 'opening_balance' : 'purchase'),
+        // Purity is always entered in karat; an item saved in another unit is shown converted.
+        purity_input: inputNumber(item ? (item.purity_source === 'karat' ? item.purity_input : item.purity_karat) : null),
         acquisition_cost: inputNumber(item?.acquisition_cost ?? null),
         purchase_store: item?.purchase_store ?? '',
         resale_discount_percent: inputNumber(item?.resale_discount_percent ?? null),
         owned_since: item?.owned_since ?? '',
         owned_since_certainty: item?.owned_since_certainty ?? 'exact',
-        owned_since_note: item?.owned_since_note ?? '',
         haul_start: item?.haul_start ?? '',
         haul_start_certainty: item?.haul_start_certainty ?? 'exact',
         haul_start_note: item?.haul_start_note ?? '',
@@ -62,12 +56,6 @@ export default function ItemForm({ kind: initialKind, old = false, item, locatio
     });
     const { data, setData, errors } = form;
     const isBar = data.kind === 'bar';
-
-    // A location created from the modal is selected right away.
-    useEffect(() => {
-        if (page.props.new_location_id) setData('location_id', page.props.new_location_id);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page.props.new_location_id]);
 
     const send = (then: 'done' | 'another') => {
         form.transform((d) => ({ ...d, then, ...(editing ? { _method: 'patch' } : {}) }));
@@ -106,7 +94,7 @@ export default function ItemForm({ kind: initialKind, old = false, item, locatio
                         {text('name', { required: true, maxLength: 160, placeholder: isBar ? 'Batangan Antam 10 g' : 'Cincin kawin' })}
                     </Field>
                     {isBar
-                        ? <Field id="brand" label="Merek (opsional)" error={err('brand')}>{text('brand', { placeholder: 'Antam, UBS' })}</Field>
+                        ? <Field id="brand" label="Merek (opsional)" error={err('brand')}>{select('brand', Object.fromEntries(BRANDS.map((b) => [b, b])), 'Pilih merek')}</Field>
                         : <Field id="jewelry_type" label="Jenis perhiasan" error={err('jewelry_type')}>{select('jewelry_type', JEWELRY_TYPES, 'Pilih jenis')}</Field>}
                     <Field id="ownership" label="Kepemilikan" error={err('ownership')} hint="Titipan orang lain tidak dihitung dalam total Anda.">
                         {select('ownership', { own: 'Milik sendiri', held_for_others: 'Titipan orang lain' })}
@@ -165,28 +153,28 @@ export default function ItemForm({ kind: initialKind, old = false, item, locatio
                             <Field id="purpose" label="Tujuan" error={err('purpose')}>{select('purpose', PURPOSES)}</Field>
                         </>
                     )}
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <Field id="purity_source" label="Satuan kadar" error={err('purity_source')}>{select('purity_source', PURITY_UNITS)}</Field>
-                        <Field id="purity_input" label="Kadar" error={err('purity_input')}>{text('purity_input', { inputMode: 'decimal', placeholder: isBar ? '999,9' : '750' })}</Field>
-                    </div>
+                    <Field id="purity_input" label="Kadar (karat)" error={err('purity_input')} hint="Mis. 24 untuk emas batangan, 17 atau 18 untuk perhiasan. Kadar karat dihitung sebagai perkiraan.">
+                        <div className="relative">
+                            {text('purity_input', { inputMode: 'decimal', placeholder: isBar ? '24' : '18', className: 'field-input pr-16' })}
+                            <span aria-hidden className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-muted">karat</span>
+                        </div>
+                    </Field>
                 </Section>
 
-                <Section title="Perolehan dan tanggal">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <Field id="acquisition_method" label="Cara perolehan" error={err('acquisition_method')}>{select('acquisition_method', ACQUISITION_LABEL)}</Field>
-                        <Field id="acquisition_cost" label="Harga perolehan (Rp, opsional)" error={err('acquisition_cost')}>{text('acquisition_cost', { inputMode: 'numeric', placeholder: 'Kosong = tidak diketahui' })}</Field>
-                    </div>
+                <Section title="Pembelian dan tanggal">
+                    <Field id="acquisition_cost" label="Harga beli (Rp, opsional)" error={err('acquisition_cost')}>{text('acquisition_cost', { inputMode: 'numeric', placeholder: 'Kosong = tidak diketahui' })}</Field>
                     <Field id="purchase_store" label="Toko / tempat pembelian (opsional)" error={err('purchase_store')}>{text('purchase_store', { maxLength: 120, placeholder: 'Mis. Toko Emas Mulia Gold Palembang' })}</Field>
-                    <Field id="resale_discount_percent" label="Potongan jual (%, opsional)" error={err('resale_discount_percent')} hint="Perkiraan potongan toko bila barang ini dijual. Dipakai untuk memperkirakan harga jual.">
-                        {text('resale_discount_percent', { inputMode: 'decimal', placeholder: 'Mis. 10 atau 15' })}
-                    </Field>
+                    {!isBar && (
+                        <Field id="resale_discount_percent" label="Potongan jual (%, opsional)" error={err('resale_discount_percent')} hint="Perkiraan potongan toko bila perhiasan ini dijual. Dipakai untuk memperkirakan harga jual.">
+                            {text('resale_discount_percent', { inputMode: 'decimal', placeholder: 'Mis. 10 atau 15' })}
+                        </Field>
+                    )}
                     <div className="grid gap-4 sm:grid-cols-2">
                         <Field id="owned_since" label="Dimiliki sejak" error={err('owned_since')} hint="Berbeda dari tanggal Anda mencatat di aplikasi ini.">
                             {text('owned_since', { type: 'date', max: new Date().toISOString().slice(0, 10) })}
                         </Field>
                         <Field id="owned_since_certainty" label="Kepastian tanggal" error={err('owned_since_certainty')}>{select('owned_since_certainty', DATE_CERTAINTY)}</Field>
                     </div>
-                    <Field id="owned_since_note" label="Catatan tanggal (opsional)" error={err('owned_since_note')}>{text('owned_since_note', { placeholder: 'Mis. dibeli menjelang lebaran' })}</Field>
                     {(old || data.haul_start) && (
                         <>
                             <div className="grid gap-4 sm:grid-cols-2">
@@ -200,11 +188,7 @@ export default function ItemForm({ kind: initialKind, old = false, item, locatio
                     )}
                 </Section>
 
-                <Section title="Lokasi, foto, dan catatan">
-                    <Field id="location_id" label="Lokasi simpan" error={err('location_id')}>
-                        {select('location_id', Object.fromEntries(locations.map((l) => [l.id, l.name])), 'Belum ditentukan')}
-                    </Field>
-                    <button type="button" onClick={() => setLocOpen(true)} className="-mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-brand-dark underline underline-offset-2">Lokasi baru</button>
+                <Section title="Foto dan catatan">
                     <Field id="photo" label={editing ? 'Tambah foto (opsional)' : 'Foto (opsional)'} error={err('photo')} hint="JPG, PNG, atau WebP, maksimal 5 MB. Foto bersifat pribadi.">
                         <input id="photo" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setData('photo', e.target.files?.[0] ?? null)}
                             className="mt-1.5 block w-full text-sm file:mr-3 file:h-11 file:rounded-xl file:border file:border-line file:bg-white file:px-4 file:text-sm file:font-medium" />
@@ -223,7 +207,6 @@ export default function ItemForm({ kind: initialKind, old = false, item, locatio
                 </div>
             </form>
 
-            <LocationModal open={locOpen} onClose={() => setLocOpen(false)} />
             <Modal open={discardOpen} onClose={() => setDiscardOpen(false)} title="Buang perubahan?">
                 <p className="text-sm text-muted">Isian yang belum disimpan akan hilang.</p>
                 <div className="mt-4 flex gap-3">

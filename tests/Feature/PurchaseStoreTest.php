@@ -28,9 +28,9 @@ class PurchaseStoreTest extends TestCase
     private function ringPayload(array $over = []): array
     {
         return $over + [
-            'kind' => 'jewelry', 'name' => 'Gelang kaku putih', 'ownership' => 'own', 'acquisition_method' => 'purchase',
+            'kind' => 'jewelry', 'name' => 'Gelang kaku putih', 'ownership' => 'own', 
             'owned_since_certainty' => 'exact', 'gross_weight_g' => '7', 'stone_state' => 'known', 'stone_weight_g' => '0,92',
-            'purity_source' => 'karat', 'purity_input' => '17', 'acquisition_cost' => '4895000',
+            'purity_input' => '17', 'acquisition_cost' => '4895000',
         ];
     }
 
@@ -144,12 +144,12 @@ class PurchaseStoreTest extends TestCase
         $columns = $report->sections[0]->columns;
         $a = collect($report->sections[0]->rows)->firstWhere(0, 'A');
 
-        $this->assertSame(['Toko', 'Harga perolehan', 'Harga per gram', 'Potongan', 'Harga setelah potongan'], [$columns[7], $columns[9], $columns[10], $columns[11], $columns[12]]);
+        $this->assertSame(['Toko', 'Harga beli', 'Harga per gram', 'Potongan', 'Harga setelah potongan'], [$columns[7], $columns[8], $columns[9], $columns[10], $columns[11]]);
         $this->assertSame('Signature CCM', $a[7]);
-        $this->assertSame('Rp 7.000.000', $a[9]);
-        $this->assertSame('Rp 700.000', $a[10]); // 7,000,000 / 10 g
-        $this->assertSame('10%', $a[11]);
-        $this->assertSame('Rp 6.300.000', $a[12]);
+        $this->assertSame('Rp 7.000.000', $a[8]);
+        $this->assertSame('Rp 700.000', $a[9]); // 7,000,000 / 10 g
+        $this->assertSame('10%', $a[10]);
+        $this->assertSame('Rp 6.300.000', $a[11]);
 
         $summary = $report->sections[1];
         $this->assertSame('Rekap per toko', $summary->heading);

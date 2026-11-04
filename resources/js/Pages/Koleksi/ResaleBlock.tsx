@@ -5,7 +5,7 @@ import { dateId, gram, rupiahCents } from '@/lib/format';
 import type { Item, ResaleEstimateData } from '@/types';
 
 const MISSING_TEXT: Record<string, string> = {
-    acquisition_cost: 'harga perolehan',
+    acquisition_cost: 'harga beli',
     resale_discount_percent: 'potongan jual',
     net_weight: 'berat bersih',
 };

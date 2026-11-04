@@ -6,7 +6,7 @@ import Modal from '@/Components/Modal';
 import Secret from '@/Components/Secret';
 import ResaleBlock from './ResaleBlock';
 import AppLayout from '@/Layouts/AppLayout';
-import { ACQUISITION_LABEL, DATE_CERTAINTY, KIND_LABEL, dateId, gram, missingText, purityLabel, rupiah, rupiahCents } from '@/lib/format';
+import { DATE_CERTAINTY, KIND_LABEL, dateId, gram, missingText, purityLabel, rupiah, rupiahCents } from '@/lib/format';
 import type { Item } from '@/types';
 
 type Photo = { id: string; name: string; url: string };
@@ -37,14 +37,11 @@ export default function Detail({ item, photos }: { item: Item; photos: Photo[] }
             ] as [string, ReactNode][])),
         ['Berat bersih logam', weight(item.net_g)],
         ['Kepemilikan', item.ownership === 'own' ? 'Milik sendiri' : `Titipan${item.held_for ? ` · ${item.held_for}` : ''} (tidak dihitung dalam total)`],
-        ['Lokasi', item.location?.name ?? 'Belum ditentukan'],
-        ['Cara perolehan', ACQUISITION_LABEL[item.acquisition_method] ?? item.acquisition_method],
-        ['Harga perolehan', item.acquisition_cost === null ? 'Tidak diketahui' : <Secret>{rupiah(item.acquisition_cost)}</Secret>],
+        ['Harga beli', item.acquisition_cost === null ? 'Tidak diketahui' : <Secret>{rupiah(item.acquisition_cost)}</Secret>],
         ['Harga per gram', item.price_per_gram === null ? 'Belum bisa dihitung' : <Secret>{rupiahCents(item.price_per_gram)}</Secret>],
         ['Toko / tempat pembelian', item.purchase_store ?? 'Belum diisi'],
-        ['Potongan jual', item.resale_discount_percent === null ? 'Belum diisi' : `${gram(item.resale_discount_percent, 0)}%`],
+        ...(item.kind === 'jewelry' ? ([['Potongan jual', item.resale_discount_percent === null ? 'Belum diisi' : `${gram(item.resale_discount_percent, 0)}%`]] as [string, ReactNode][]) : []),
         ['Dimiliki sejak', item.owned_since ? `${dateId(item.owned_since)} (${DATE_CERTAINTY[item.owned_since_certainty]?.toLowerCase()})` : 'Tidak diketahui'],
-        ...(item.owned_since_note ? ([['Catatan tanggal', item.owned_since_note]] as [string, ReactNode][]) : []),
         ...(item.haul_start ? ([['Awal haul', `${dateId(item.haul_start)} (${DATE_CERTAINTY[item.haul_start_certainty ?? 'exact']?.toLowerCase()})`]] as [string, ReactNode][]) : []),
         ['Dicatat pada', dateId(item.created_at)],
         ...(item.notes ? ([['Catatan', item.notes]] as [string, ReactNode][]) : []),
@@ -95,7 +92,7 @@ export default function Detail({ item, photos }: { item: Item; photos: Photo[] }
                 </dl>
             </section>
 
-            <ResaleBlock item={item} />
+            {item.kind === 'jewelry' && <ResaleBlock item={item} />}
 
             {item.kind === 'bar' && item.units.some((u) => u.serial_number) && (
                 <section aria-label="Nomor seri" className="panel mt-5 p-4">

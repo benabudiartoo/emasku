@@ -21,6 +21,9 @@ class ItemController extends Controller
     /** Numeric inputs may be typed with an Indonesian decimal comma. */
     private const DECIMAL_FIELDS = ['unit_weight_g', 'gross_weight_g', 'stone_weight_g', 'net_weight_g', 'purity_input', 'acquisition_cost', 'resale_discount_percent'];
 
+    /** Brands offered for gold bars. */
+    public const BRANDS = ['Antam', 'Galeri 24', 'Lotus Archi', 'UBS', 'Hartadinata', 'Lainnya'];
+
     public function __construct(private GoldCalculator $calc) {}
 
     public function index(Request $request): Response
@@ -46,7 +49,6 @@ class ItemController extends Controller
         return Inertia::render('Koleksi/Baru', [
             'kind' => $kind === 'batangan' ? 'bar' : 'jewelry',
             'old' => false,
-            'locations' => $this->locations($request->user()->id),
         ]);
     }
 
@@ -55,7 +57,6 @@ class ItemController extends Controller
         return Inertia::render('Koleksi/Baru', [
             'kind' => 'bar',
             'old' => true,
-            'locations' => $this->locations($request->user()->id),
         ]);
     }
 
@@ -112,7 +113,6 @@ class ItemController extends Controller
 
         return Inertia::render('Koleksi/Edit', [
             'item' => ItemPresenter::present($item, $this->calc),
-            'locations' => $this->locations($request->user()->id),
         ]);
     }
 
@@ -163,20 +163,17 @@ class ItemController extends Controller
 
         $rules = [
             'name' => ['required', 'string', 'max:160'],
-            'brand' => ['nullable', 'string', 'max:120'],
+            'brand' => ['nullable', Rule::in(self::BRANDS)],
             // A location must belong to this owner, or it could point at someone else's record.
             'location_id' => ['nullable', Rule::exists('locations', 'id')->where('user_id', $request->user()->id)],
             'ownership' => ['required', 'in:own,held_for_others'],
             'held_for' => ['nullable', 'required_if:ownership,held_for_others', 'string', 'max:160'],
-            'purity_source' => ['nullable', 'required_with:purity_input', 'in:permil,percent,karat'],
             'purity_input' => ['nullable', 'numeric'],
-            'acquisition_method' => ['required', 'in:purchase,gift,inheritance,opening_balance'],
             'acquisition_cost' => ['nullable', 'numeric', 'min:0', 'max:9999999999999999'],
             'purchase_store' => ['nullable', 'string', 'max:120'],
             'resale_discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'owned_since' => ['nullable', 'date', 'before_or_equal:today'],
             'owned_since_certainty' => ['required', Rule::in($dateCertainty)],
-            'owned_since_note' => ['nullable', 'string', 'max:1000'],
             'haul_start' => ['nullable', 'date', 'before_or_equal:today'],
             'haul_start_certainty' => ['nullable', 'required_with:haul_start', Rule::in($dateCertainty)],
             'haul_start_note' => ['nullable', 'string', 'max:1000'],
@@ -210,9 +207,11 @@ class ItemController extends Controller
 
         $data = $request->validate($rules);
 
+        // Purity is entered in karat only.
         if (($data['purity_input'] ?? null) !== null) {
+            $data['purity_source'] = 'karat';
             try {
-                $data['purity_fraction'] = GoldCalculator::purityFraction($data['purity_source'], (string) $data['purity_input']);
+                $data['purity_fraction'] = GoldCalculator::purityFraction('karat', (string) $data['purity_input']);
             } catch (InvalidArgumentException) {
                 throw ValidationException::withMessages(['purity_input' => 'Kadar di luar rentang untuk satuan yang dipilih.']);
             }
@@ -229,7 +228,7 @@ class ItemController extends Controller
     {
         $attributes = collect($data)->only([
             'name', 'brand', 'location_id', 'ownership', 'held_for', 'purity_fraction', 'purity_source', 'purity_input',
-            'acquisition_method', 'acquisition_cost', 'purchase_store', 'resale_discount_percent', 'owned_since', 'owned_since_certainty', 'owned_since_note',
+            'acquisition_cost', 'purchase_store', 'resale_discount_percent', 'owned_since', 'owned_since_certainty',
             'haul_start', 'haul_start_certainty', 'haul_start_note', 'notes',
         ])->all();
 
@@ -240,6 +239,7 @@ class ItemController extends Controller
 
         if ($kind === 'bar') {
             $attributes['unit_weight_g'] = $data['unit_weight_g'] ?? null;
+            $attributes['resale_discount_percent'] = null; // only jewelry has a resale discount
         } else {
             $attributes += collect($data)->only(['jewelry_type', 'gross_weight_g', 'stone_state', 'net_weight_g', 'purpose'])->all();
             // Unknown stays null, never zero; the weight only counts when the stone is stated as known.

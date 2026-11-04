@@ -43,13 +43,13 @@ Di `/zakat/hitung`, tombol **Ambil harga terbaru** mengisi harga emas per gram d
 ## Toko pembelian dan potongan jual
 
 - **Toko / tempat pembelian** adalah teks bebas pada barang (maks 120 karakter), terpisah dari "Lokasi simpan". Muncul di detail, kartu daftar, filter "Toko" di Koleksi, kolom Toko di ekspor, dan bagian "Rekap per toko" di ekspor (dikelompokkan menurut tulisan yang sama persis).
-- **Harga per gram** = harga perolehan dibagi berat bersih (dibulatkan sekali, 2 desimal, tidak disimpan). Kosong, bukan nol, bila harga atau berat belum ada.
+- **Harga per gram** = harga beli dibagi berat bersih (dibulatkan sekali, 2 desimal, tidak disimpan). Kosong, bukan nol, bila harga atau berat belum ada.
 - **Potongan jual (%)** diisi per barang. Perkiraan harga jual:
-  - harga setelah potongan = harga beli per gram × (1 − potongan) × berat bersih (sama dengan harga perolehan × (1 − potongan));
+  - harga setelah potongan = harga beli per gram × (1 − potongan) × berat bersih (sama dengan harga beli × (1 − potongan));
   - harga pasar barang = gram emas murni × harga spot terbaru per gram;
   - **perkiraan harga jual = yang lebih besar dari keduanya**, dan layar menyebut yang mana yang dipakai.
 - Bila harga pasar tidak bisa diambil (atau kadar barang belum diisi), yang tampil hanya harga setelah potongan dengan keterangan "tanpa pembanding harga pasar"; tidak pernah dianggap nol atau sama dengan harga setelah potongan. Barang tanpa harga beli, berat bersih, atau potongan tidak diperkirakan dan jumlahnya ditulis.
-- Kartu **Perkiraan hasil jual** di Ringkasan menjumlah hanya barang yang bisa diperkirakan dan membandingkannya dengan harga perolehan barang yang sama. Ini perkiraan, bukan janji harga toko emas.
+- Kartu **Perkiraan hasil jual** di Ringkasan menjumlah hanya barang yang bisa diperkirakan dan membandingkannya dengan harga beli barang yang sama. Ini perkiraan, bukan janji harga toko emas.
 
 ## Impor dari Excel
 
@@ -79,7 +79,7 @@ Empat grafik di bawahnya memakai barang milik sendiri (barang titipan tidak ikut
 
 - **Emas murni per jenis** dan **per lokasi** (gram). Lokasi: lima terbesar, sisanya digabung sebagai "Lainnya"; barang tanpa lokasi tampil sebagai "Tanpa lokasi".
 - **Pertumbuhan total berat emas**: total gram kumulatif (berat bersih semua barang, bukan hanya emas murni) menurut "Dimiliki sejak". Barang tanpa tanggal tidak digambar dan jumlahnya ditulis; jumlah tanggal perkiraan juga ditulis.
-- **Nilai sekarang vs harga beli** (Rp): nilai = gram emas murni x harga terbaru (Gold-API.com x kurs Frankfurter, lihat bagian harga otomatis), dihitung di server dengan bcmath. Pembandingnya hanya barang yang "Harga perolehan"-nya diisi, dibanding nilai barang yang sama. Harga perolehan dianggap total untuk satu catatan barang, bukan per keping. Bila tidak ada barang berharga perolehan, hanya nilai total yang tampil.
+- **Nilai sekarang vs harga beli** (Rp): nilai = gram emas murni x harga terbaru (Gold-API.com x kurs Frankfurter, lihat bagian harga otomatis), dihitung di server dengan bcmath. Pembandingnya hanya barang yang "Harga beli"-nya diisi, dibanding nilai barang yang sama. Harga beli dianggap total untuk satu catatan barang, bukan per keping. Bila tidak ada barang berharga beli, hanya nilai total yang tampil.
 - Nilai rupiah dimuat setelah halaman terbuka lewat `GET /ringkasan/nilai`. Bila harga gagal diambil atau `GOLDPRICE_ENABLED=false`, grafik rupiah diganti pesan dan grafik gram tetap tampil. Ini harga spot internasional, bukan harga toko emas.
 - Saat "Sembunyikan nominal" aktif, isi semua grafik diganti "Nominal disembunyikan" (bentuk batang pun bisa membocorkan angka). Setiap grafik punya tampilan tabel.
 

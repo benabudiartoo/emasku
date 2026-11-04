@@ -49,13 +49,6 @@ export function missingText(missing: string[]): string {
 
 export const DATE_CERTAINTY: Record<string, string> = { exact: 'Pasti', approximate: 'Perkiraan', unknown: 'Tidak tahu' };
 
-export const ACQUISITION_LABEL: Record<string, string> = {
-    purchase: 'Beli',
-    gift: 'Hadiah',
-    inheritance: 'Warisan',
-    opening_balance: 'Saldo awal (sudah lama dimiliki)',
-};
-
 export function dateId(value: string | null): string {
     if (!value) return '';
     const [y, m, d] = value.split('-');

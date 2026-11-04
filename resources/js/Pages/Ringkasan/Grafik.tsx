@@ -86,12 +86,12 @@ export default function Grafik({ charts }: { charts: SummaryChartsData }) {
                                             Selisih {signed(c.difference, idr)}
                                             {c.difference_percent !== null && ` (${signed(c.difference_percent, (a) => `${gram(a, 1)}%`)})`}
                                         </p>
-                                        <p className="mt-1 text-xs text-muted">Dihitung dari {c.items_with_cost} barang yang harga perolehannya diisi, dibanding nilai barang yang sama.</p>
-                                        {c.items_without_cost > 0 && <p className="mt-1 text-xs text-muted">{c.items_without_cost} barang tanpa harga perolehan tidak ikut dibandingkan.</p>}
+                                        <p className="mt-1 text-xs text-muted">Dihitung dari {c.items_with_cost} barang yang harga belinya diisi, dibanding nilai barang yang sama.</p>
+                                        {c.items_without_cost > 0 && <p className="mt-1 text-xs text-muted">{c.items_without_cost} barang tanpa harga beli tidak ikut dibandingkan.</p>}
                                     </CompareBars>
                                 </div>
                             ) : (
-                                <p className="mt-3 text-sm text-muted">Belum ada barang dengan harga perolehan, jadi belum ada pembanding. Isi “Harga perolehan” pada barang untuk melihat selisihnya.</p>
+                                <p className="mt-3 text-sm text-muted">Belum ada barang dengan harga beli, jadi belum ada pembanding. Isi “Harga beli” pada barang untuk melihat selisihnya.</p>
                             )}
 
                             <p className="mt-4 text-xs leading-relaxed text-muted">
@@ -106,7 +106,7 @@ export default function Grafik({ charts }: { charts: SummaryChartsData }) {
                     {error && <p role="alert" className="text-sm text-red-800">{error} Perkiraan hasil jual memakai harga pasar, jadi belum bisa ditampilkan.</p>}
                     {value && r && (r.items_estimated === 0 ? (
                         <p className="text-sm text-muted">
-                            Belum ada barang yang bisa diperkirakan. Isi “Potongan jual” dan “Harga perolehan” pada barang Anda.
+                            Belum ada barang yang bisa diperkirakan. Isi “Potongan jual” dan “Harga beli” pada barang Anda.
                             {r.items_not_estimable > 0 && ` ${r.items_not_estimable} barang sudah punya potongan tetapi datanya belum lengkap.`}
                         </p>
                     ) : (
@@ -119,7 +119,7 @@ export default function Grafik({ charts }: { charts: SummaryChartsData }) {
                                         Selisih {signed(r.difference, idr)}
                                         {r.difference_percent !== null && ` (${signed(r.difference_percent, (a) => `${gram(a, 1)}%`)})`}
                                     </p>
-                                    <p className="mt-1 text-xs text-muted">Dari {r.items_estimated} barang, dibanding harga perolehan barang yang sama.</p>
+                                    <p className="mt-1 text-xs text-muted">Dari {r.items_estimated} barang, dibanding harga beli barang yang sama.</p>
                                     {r.items_using_market > 0 && <p className="mt-1 text-xs text-muted">{r.items_using_market} barang memakai harga pasar karena lebih tinggi dari harga setelah potongan.</p>}
                                     {r.items_not_estimable > 0 && <p className="mt-1 text-xs text-muted">{r.items_not_estimable} barang punya potongan tetapi belum lengkap datanya, jadi tidak ikut.</p>}
                                 </CompareBars>

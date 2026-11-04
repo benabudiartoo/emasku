@@ -40,7 +40,7 @@ class ExportReportTest extends TestCase
 
         $this->assertSame('99,99', $report->facts['Total emas murni milik sendiri (g)']);
         $row = $this->rowsOf($report)[0];
-        $this->assertSame(['Batangan Antam 10 g', 'Batangan', 'Milik sendiri', '10', '100,00', '999,9 ‰', '99,99', '', '', '', '', '', '', 'Lengkap', ''], $row);
+        $this->assertSame(['Batangan Antam 10 g', 'Batangan', 'Milik sendiri', '10', '100,00', '999,9 ‰', '99,99', '', '', '', '', '', 'Lengkap', ''], $row);
     }
 
     public function test_the_item_note_is_exported_in_the_catatan_column(): void
@@ -50,9 +50,9 @@ class ExportReportTest extends TestCase
 
         $report = app(CollectionReport::class)->build($this->user->id, []);
 
-        $this->assertSame('Catatan', $report->sections[0]->columns[14]);
-        $this->assertSame("Disimpan di brankas\nbeli menjelang lebaran", collect($this->rowsOf($report))->firstWhere(0, 'Dengan catatan')[14]);
-        $this->assertSame('', collect($this->rowsOf($report))->firstWhere(0, 'Tanpa catatan')[14]);
+        $this->assertSame('Catatan', $report->sections[0]->columns[13]);
+        $this->assertSame("Disimpan di brankas\nbeli menjelang lebaran", collect($this->rowsOf($report))->firstWhere(0, 'Dengan catatan')[13]);
+        $this->assertSame('', collect($this->rowsOf($report))->firstWhere(0, 'Tanpa catatan')[13]);
     }
 
     public function test_missing_data_is_named_and_never_written_as_zero_or_counted(): void
@@ -65,7 +65,7 @@ class ExportReportTest extends TestCase
         $row = collect($this->rowsOf($report))->firstWhere(0, 'Belum ditimbang');
         $this->assertSame(Fmt::NEEDS, $row[4]); // net weight
         $this->assertSame(Fmt::NEEDS, $row[6]); // pure gold
-        $this->assertStringStartsWith('Data diperlukan: ', $row[13]);
+        $this->assertStringStartsWith('Data diperlukan: ', $row[12]);
         $this->assertNotContains('0,00', $row);
         $this->assertSame('99,99', $report->facts['Total emas murni milik sendiri (g)']);
         $this->assertSame('1', $report->facts['Barang data kurang']);

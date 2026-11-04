@@ -34,7 +34,6 @@ class CollectionReport
             Fmt::purity($i['purity_source'], $i['purity_input']).($i['purity_estimate'] ? ' (perkiraan)' : ''),
             $i['pure_gold_g'] === null ? Fmt::NEEDS : Fmt::gram($i['pure_gold_g']),
             trim((string) ($i['purchase_store'] ?? '')),
-            $i['location']['name'] ?? '',
             $i['acquisition_cost'] === null ? '' : Fmt::rupiahCents($i['acquisition_cost']),
             $i['price_per_gram'] === null ? '' : Fmt::rupiahCents($i['price_per_gram']),
             $i['resale_discount_percent'] === null ? '' : Fmt::gram($i['resale_discount_percent'], 0).'%',
@@ -55,15 +54,15 @@ class CollectionReport
             ],
             sections: [
                 new ReportSection('Daftar barang', [
-                    'Nama', 'Jenis', 'Kepemilikan', 'Keping', 'Berat bersih (g)', 'Kadar', 'Emas murni (g)', 'Toko', 'Lokasi',
-                    'Harga perolehan', 'Harga per gram', 'Potongan', 'Harga setelah potongan', 'Data', 'Catatan',
+                    'Nama', 'Jenis', 'Kepemilikan', 'Keping', 'Berat bersih (g)', 'Kadar', 'Emas murni (g)', 'Toko',
+                    'Harga beli', 'Harga per gram', 'Potongan', 'Harga setelah potongan', 'Data', 'Catatan',
                 ], $rows, 'Belum ada barang untuk filter ini.'),
-                new ReportSection('Rekap per toko', ['Toko', 'Jumlah barang', 'Total berat bersih (g)', 'Total harga perolehan', 'Harga per gram'], $this->perStore($models), 'Belum ada barang milik sendiri.'),
+                new ReportSection('Rekap per toko', ['Toko', 'Jumlah barang', 'Total berat bersih (g)', 'Total harga beli', 'Harga per gram'], $this->perStore($models), 'Belum ada barang milik sendiri.'),
             ],
             notes: [
                 'Total hanya menghitung barang milik sendiri yang datanya lengkap. Barang titipan dan barang dengan data kurang tidak ikut dihitung.',
-                'Harga per gram adalah harga perolehan dibagi berat bersih. Harga setelah potongan adalah harga perolehan dikurangi potongan jual; ini perkiraan, bukan harga toko emas.',
-                'Rekap per toko mengelompokkan menurut tulisan toko yang sama persis. Berat dan harga hanya dijumlah dari barang yang beratnya diketahui; harga per gram dari barang yang punya harga perolehan dan berat.',
+                'Harga per gram adalah harga beli dibagi berat bersih. Harga setelah potongan adalah harga beli dikurangi potongan jual; ini perkiraan, bukan harga toko emas.',
+                'Rekap per toko mengelompokkan menurut tulisan toko yang sama persis. Berat dan harga hanya dijumlah dari barang yang beratnya diketahui; harga per gram dari barang yang punya harga beli dan berat.',
             ],
             landscape: true,
         );

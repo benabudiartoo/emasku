@@ -96,8 +96,9 @@ export type Item = {
     net_weight_g: string | null;
     purity_source: 'permil' | 'percent' | 'karat' | null;
     purity_input: string | null;
+    /** The purity written in karat, whatever unit it was saved in. */
+    purity_karat: string | null;
     purpose: string | null;
-    acquisition_method: string;
     acquisition_cost: string | null;
     purchase_store: string | null;
     resale_discount_percent: string | null;
@@ -105,7 +106,6 @@ export type Item = {
     discounted_price: string | null;
     owned_since: string | null;
     owned_since_certainty: string;
-    owned_since_note: string | null;
     haul_start: string | null;
     haul_start_certainty: string | null;
     haul_start_note: string | null;

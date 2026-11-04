@@ -9,7 +9,7 @@ type Bar = { label: string; value: string; color: string };
  */
 export default function CompareBars({ cost, value, format, valueLabel = 'Nilai sekarang', children }: { cost: string; value: string; format: (v: string) => string; valueLabel?: string; children?: ReactNode }) {
     const bars: Bar[] = [
-        { label: 'Harga perolehan', value: cost, color: SERIES_GOLD },
+        { label: 'Harga beli', value: cost, color: SERIES_GOLD },
         { label: valueLabel, value, color: SERIES_GREEN },
     ];
     const max = Math.max(...bars.map((b) => Number(b.value)), 0);
@@ -37,7 +37,7 @@ export default function CompareBars({ cost, value, format, valueLabel = 'Nilai s
                 ))}
             </ul>
             {children}
-            <TableView caption={`${valueLabel} dan harga perolehan`} head={['Ukuran', 'Rupiah']} rows={bars.map((b) => [b.label, format(b.value)])} />
+            <TableView caption={`${valueLabel} dan harga beli`} head={['Ukuran', 'Rupiah']} rows={bars.map((b) => [b.label, format(b.value)])} />
         </div>
     );
 }

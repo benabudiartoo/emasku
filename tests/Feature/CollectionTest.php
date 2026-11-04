@@ -28,18 +28,18 @@ class CollectionTest extends TestCase
     private function barPayload(array $over = []): array
     {
         return $over + [
-            'kind' => 'bar', 'name' => 'Antam 10 g', 'ownership' => 'own', 'acquisition_method' => 'purchase',
+            'kind' => 'bar', 'name' => 'Antam 10 g', 'ownership' => 'own', 
             'owned_since_certainty' => 'exact', 'unit_weight_g' => '10', 'unit_mode' => 'serial', 'serials' => ['A1', 'A2'],
-            'purity_source' => 'permil', 'purity_input' => '999,9',
+            'purity_input' => '24',
         ];
     }
 
     private function ringPayload(array $over = []): array
     {
         return $over + [
-            'kind' => 'jewelry', 'name' => 'Cincin', 'ownership' => 'own', 'acquisition_method' => 'purchase',
+            'kind' => 'jewelry', 'name' => 'Cincin', 'ownership' => 'own', 
             'owned_since_certainty' => 'exact', 'gross_weight_g' => '8', 'stone_state' => 'known', 'stone_weight_g' => '2',
-            'purity_source' => 'permil', 'purity_input' => '750',
+            'purity_input' => '18',
         ];
     }
 
@@ -50,7 +50,7 @@ class CollectionTest extends TestCase
         $item = Item::firstOrFail();
         $this->assertSame($this->user->id, $item->user_id);
         $this->assertSame(2, $item->units()->count());
-        $this->assertSame('0.999900', $item->purity_fraction);
+        $this->assertSame('1.000000', $item->purity_fraction);
     }
 
     public function test_identical_lot_stores_one_unit_with_quantity(): void
@@ -88,7 +88,7 @@ class CollectionTest extends TestCase
 
     public function test_purity_out_of_range_is_rejected(): void
     {
-        $this->post('/koleksi', $this->ringPayload(['purity_input' => '1500']))->assertSessionHasErrors('purity_input');
+        $this->post('/koleksi', $this->ringPayload(['purity_input' => '30']))->assertSessionHasErrors('purity_input');
         $this->assertSame(0, Item::count());
     }
 
@@ -110,7 +110,7 @@ class CollectionTest extends TestCase
     {
         $this->post('/koleksi', $this->barPayload([
             'old' => true, 'then' => 'another', 'owned_since' => '2015-06-01', 'owned_since_certainty' => 'approximate',
-            'haul_start' => '2016-01-01', 'haul_start_certainty' => 'unknown', 'acquisition_method' => 'opening_balance',
+            'haul_start' => '2016-01-01', 'haul_start_certainty' => 'unknown',
         ]))->assertRedirect('/koleksi/lama');
 
         $item = Item::firstOrFail();
