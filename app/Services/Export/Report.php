@@ -16,5 +16,6 @@ final class Report
         public readonly array $facts = [],
         public readonly array $sections = [],
         public readonly array $notes = [],
+        public readonly bool $landscape = false,
     ) {}
 }

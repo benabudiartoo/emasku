@@ -62,3 +62,9 @@ export function dateId(value: string | null): string {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
     return `${Number(d)} ${months[Number(m) - 1]} ${y}`;
 }
+
+/** Rupiah exactly as the server computed it: whole rupiah when the cents are 00, otherwise both decimals ("909,20", not "909,2"). */
+export function rupiahCents(value: string | null): string {
+    if (value === null) return '';
+    return `Rp ${value.endsWith('.00') ? gram(value.slice(0, -3), 0) : gram(value, 2)}`;
+}

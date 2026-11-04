@@ -40,6 +40,28 @@ Di `/zakat/hitung`, tombol **Ambil harga terbaru** mengisi harga emas per gram d
 - Bila sumber gagal (dimatikan, batas terlampaui, galat), tombol menampilkan pesan dan harga tetap diisi manual; tidak pernah ada angka nol atau data usang.
 - goldprice.org tidak dipakai (syarat penggunaannya melarang pengambilan otomatis) dan GoldPriceZ tidak dipakai (perlu kunci terdaftar).
 
+## Toko pembelian dan potongan jual
+
+- **Toko / tempat pembelian** adalah teks bebas pada barang (maks 120 karakter), terpisah dari "Lokasi simpan". Muncul di detail, kartu daftar, filter "Toko" di Koleksi, kolom Toko di ekspor, dan bagian "Rekap per toko" di ekspor (dikelompokkan menurut tulisan yang sama persis).
+- **Harga per gram** = harga perolehan dibagi berat bersih (dibulatkan sekali, 2 desimal, tidak disimpan). Kosong, bukan nol, bila harga atau berat belum ada.
+- **Potongan jual (%)** diisi per barang. Perkiraan harga jual:
+  - harga setelah potongan = harga beli per gram × (1 − potongan) × berat bersih (sama dengan harga perolehan × (1 − potongan));
+  - harga pasar barang = gram emas murni × harga spot terbaru per gram;
+  - **perkiraan harga jual = yang lebih besar dari keduanya**, dan layar menyebut yang mana yang dipakai.
+- Bila harga pasar tidak bisa diambil (atau kadar barang belum diisi), yang tampil hanya harga setelah potongan dengan keterangan "tanpa pembanding harga pasar"; tidak pernah dianggap nol atau sama dengan harga setelah potongan. Barang tanpa harga beli, berat bersih, atau potongan tidak diperkirakan dan jumlahnya ditulis.
+- Kartu **Perkiraan hasil jual** di Ringkasan menjumlah hanya barang yang bisa diperkirakan dan membandingkannya dengan harga perolehan barang yang sama. Ini perkiraan, bukan janji harga toko emas.
+
+## Impor dari Excel
+
+Koleksi, lalu **Impor Excel** (atau kartu di halaman Mulai): unggah `.xlsx`, lihat pratinjau, centang baris, **Simpan**. Belum ada yang tersimpan sebelum Anda menyimpan.
+
+- **Format:** sheet dikenali dari judul kolom **Nama Perhiasan** dan **Berat (Gram)** atau **Harga Beli (Rp)**. Kolom lain yang dipakai: Toko / Lokasi Pembelian, Kategori, Tanggal Beli, Kadar, dan POTONGAN bila ada. Kolom Harga / Gram diabaikan (dihitung otomatis). Sheet "Daftar Perhiasan" dipilih lebih dulu; sheet lain bisa dipilih di pratinjau, satu sheet per impor.
+- **Pemetaan:** setiap baris menjadi perhiasan milik sendiri, cara perolehan "beli". Berat diimpor sebagai **berat bersih logam** (batu dianggap tidak diketahui). Kategori ke jenis perhiasan (Kalung / Koye menjadi kalung, yang tidak dikenal menjadi "Lainnya" dan ditandai). Tanggal Beli menjadi "Dimiliki sejak" (pasti).
+- **Kadar** boleh `17K`, `750`, atau `75.5%`. Bila ada dua angka yang bertentangan (mis. `750/17K`: 750‰ sama dengan 18K), **karat dipakai** dan baris ditandai "perlu dicek"; teks kadar asli disimpan di catatan barang. Kadar yang tak terbaca membuat barang diimpor tanpa kadar ("Data diperlukan").
+- **Duplikat** (nama, tanggal, berat bersih, dan harga sama dengan barang yang sudah ada atau baris sebelumnya) ditandai dan tidak dicentang.
+- **Batas dan keamanan:** `.xlsx` saja, maksimal 2 MB dan 500 baris per sheet. Berkas hanya dibaca sebagai teks; rumus Excel tidak dijalankan. Pratinjau disimpan di server selama 30 menit dan terikat pada pengguna yang mengunggah; yang disimpan adalah hasil baca di server, bukan data dari peramban. Penyimpanan semua baris dilakukan dalam satu transaksi.
+- Barang hasil impor bisa diubah lewat form biasa.
+
 ## Halaman admin ringan
 
 `/admin` menampilkan siapa saja yang memakai aplikasi, **hanya sebagai jumlah**: total pengguna, aktif dan baru dalam 30 hari, total barang dan perhitungan zakat, lalu daftar pengguna (nama, email, tanggal daftar, terakhir masuk, jumlah barang, jumlah zakat). Isi emas, berat, nilai, lokasi, catatan, foto, dan hasil zakat siapa pun tidak pernah ditampilkan.

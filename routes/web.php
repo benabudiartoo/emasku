@@ -6,9 +6,11 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\GoldPriceController;
+use App\Http\Controllers\ImportController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PortfolioValueController;
+use App\Http\Controllers\ResaleEstimateController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\ZakatController;
@@ -52,7 +54,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/koleksi', [ItemController::class, 'index']);
     Route::get('/koleksi/lama', [ItemController::class, 'createOld']);
     Route::get('/koleksi/baru/{kind}', [ItemController::class, 'create']);
+
+    // Import from Excel. These sit above /koleksi/{item}, which would otherwise swallow "impor".
+    Route::get('/koleksi/impor', [ImportController::class, 'create']);
+    Route::post('/koleksi/impor', [ImportController::class, 'store'])->middleware('throttle:10,1');
+    Route::get('/koleksi/impor/{token}', [ImportController::class, 'show']);
+    Route::post('/koleksi/impor/{token}', [ImportController::class, 'save']);
+    Route::delete('/koleksi/impor/{token}', [ImportController::class, 'destroy']);
     Route::post('/koleksi', [ItemController::class, 'store']);
+    Route::get('/koleksi/{item}/perkiraan-jual', [ResaleEstimateController::class, 'show'])->middleware('throttle:gold-price');
     Route::get('/koleksi/{item}', [ItemController::class, 'show']);
     Route::get('/koleksi/{item}/edit', [ItemController::class, 'edit']);
     Route::patch('/koleksi/{item}', [ItemController::class, 'update']);

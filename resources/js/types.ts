@@ -41,6 +41,7 @@ export type ZakatView = {
     haul_start_hijri: string | null;
     haul_end_hijri: string | null;
     price_per_gram: string | null;
+    discounted_price: string | null;
     zakat_g: string | null;
     zakat_rupiah: string | null;
     contributions: { item_id: string; name: string; kind: string; pure_gold_g: string | null; included: boolean; reason: string | null; linkable?: boolean }[];
@@ -98,6 +99,10 @@ export type Item = {
     purpose: string | null;
     acquisition_method: string;
     acquisition_cost: string | null;
+    purchase_store: string | null;
+    resale_discount_percent: string | null;
+    price_per_gram: string | null;
+    discounted_price: string | null;
     owned_since: string | null;
     owned_since_certainty: string;
     owned_since_note: string | null;
@@ -142,6 +147,7 @@ export type PortfolioValueData = {
         items_with_cost: number;
         items_without_cost: number;
     } | null;
+    resale: ResaleSummary;
 };
 
 /** The light admin page: counts only, never an owner's items, weights, values, or zakat results. */
@@ -167,4 +173,46 @@ export type AdminUsers = {
     last_page: number;
     prev_url: string | null;
     next_url: string | null;
+};
+
+/** The resale estimate of one item (GET /koleksi/{item}/perkiraan-jual). `market` is null when there is no market price to compare with. */
+export type ResaleBreakdown = {
+    estimable: boolean;
+    missing: ('acquisition_cost' | 'resale_discount_percent' | 'net_weight')[];
+    discounted: string | null;
+    market: string | null;
+    estimate: string | null;
+    basis: 'market' | 'discounted' | 'discounted_only' | null;
+    market_reason: 'price_unavailable' | 'purity_unknown' | null;
+};
+
+export type ResaleEstimateData = { estimate: ResaleBreakdown; price: PriceQuote | null; price_message: string | null };
+
+/** The "Perkiraan hasil jual" totals from GET /ringkasan/nilai. */
+export type ResaleSummary = {
+    estimated_total: string;
+    cost: string;
+    difference: string;
+    difference_percent: string | null;
+    items_estimated: number;
+    items_using_market: number;
+    items_not_estimable: number;
+};
+
+/** One row read from an uploaded workbook, as shown in the import preview. */
+export type ImportRow = {
+    row: number;
+    name: string;
+    store: string | null;
+    jewelry_type: string | null;
+    owned_since: string | null;
+    purity_source: string | null;
+    purity_input: string | null;
+    purity_text: string;
+    net_weight_g: string | null;
+    acquisition_cost: string | null;
+    resale_discount_percent: string | null;
+    status: 'ok' | 'check' | 'duplicate' | 'error';
+    notes: string[];
+    selected: boolean;
 };

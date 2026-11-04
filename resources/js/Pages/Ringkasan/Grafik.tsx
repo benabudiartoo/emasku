@@ -3,13 +3,12 @@ import BarList from '@/Components/Charts/BarList';
 import ChartCard from '@/Components/Charts/ChartCard';
 import CompareBars from '@/Components/Charts/CompareBars';
 import GrowthChart from '@/Components/Charts/GrowthChart';
-import { dateId, gram } from '@/lib/format';
+import { dateId, gram, rupiahCents } from '@/lib/format';
 import type { PortfolioValueData, SummaryChartsData } from '@/types';
 
 const g = (v: string) => `${gram(v)} g`;
 
-/** Rupiah as the server computed it: whole rupiah when the cents are 00, otherwise both decimals ("909,20", not "909,2"). */
-const idr = (v: string) => `Rp ${v.endsWith('.00') ? gram(v.slice(0, -3), 0) : gram(v, 2)}`;
+const idr = rupiahCents;
 
 /** '-131438749.81' -> '-Rp 131.438.749,81' style pieces: the sign is shown, the amount is formatted without it. */
 const signed = (v: string, text: (abs: string) => string) => (v.startsWith('-') ? `-${text(v.slice(1))}` : `+${text(v)}`);
@@ -45,6 +44,7 @@ export default function Grafik({ charts }: { charts: SummaryChartsData }) {
 
     const { growth } = charts;
     const c = value?.comparison ?? null;
+    const r = value?.resale ?? null;
     const at = value ? new Date(value.price.fetched_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '';
 
     return (
@@ -99,6 +99,34 @@ export default function Grafik({ charts }: { charts: SummaryChartsData }) {
                             </p>
                         </>
                     )}
+                </ChartCard>
+
+                <ChartCard title="Perkiraan hasil jual" subtitle="Barang dengan potongan jual, dalam rupiah">
+                    {loading && <p role="status" className="text-sm text-muted">Mengambil harga terbaru...</p>}
+                    {error && <p role="alert" className="text-sm text-red-800">{error} Perkiraan hasil jual memakai harga pasar, jadi belum bisa ditampilkan.</p>}
+                    {value && r && (r.items_estimated === 0 ? (
+                        <p className="text-sm text-muted">
+                            Belum ada barang yang bisa diperkirakan. Isi “Potongan jual” dan “Harga perolehan” pada barang Anda.
+                            {r.items_not_estimable > 0 && ` ${r.items_not_estimable} barang sudah punya potongan tetapi datanya belum lengkap.`}
+                        </p>
+                    ) : (
+                        <>
+                            <p className="text-sm text-muted">Perkiraan hasil jual</p>
+                            <p className="text-2xl font-semibold tracking-tight">{idr(r.estimated_total)}</p>
+                            <div className="mt-4">
+                                <CompareBars cost={r.cost} value={r.estimated_total} format={idr} valueLabel="Perkiraan hasil jual">
+                                    <p className="mt-3 text-sm font-medium">
+                                        Selisih {signed(r.difference, idr)}
+                                        {r.difference_percent !== null && ` (${signed(r.difference_percent, (a) => `${gram(a, 1)}%`)})`}
+                                    </p>
+                                    <p className="mt-1 text-xs text-muted">Dari {r.items_estimated} barang, dibanding harga perolehan barang yang sama.</p>
+                                    {r.items_using_market > 0 && <p className="mt-1 text-xs text-muted">{r.items_using_market} barang memakai harga pasar karena lebih tinggi dari harga setelah potongan.</p>}
+                                    {r.items_not_estimable > 0 && <p className="mt-1 text-xs text-muted">{r.items_not_estimable} barang punya potongan tetapi belum lengkap datanya, jadi tidak ikut.</p>}
+                                </CompareBars>
+                            </div>
+                            <p className="mt-4 text-xs leading-relaxed text-muted">Ini perkiraan, bukan janji harga toko. Harga pasar: {value.price.source} dengan kurs {value.price.fx_source}, diambil pukul {at}.</p>
+                        </>
+                    ))}
                 </ChartCard>
             </div>
         </section>

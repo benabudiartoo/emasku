@@ -40,6 +40,16 @@ final class Fmt
         return $dec !== '' ? "{$grouped},{$dec}" : $grouped;
     }
 
+    /** Rupiah exactly as the server computed it: whole when the cents are 00, otherwise both decimals ("909,20"). */
+    public static function rupiahCents(?string $value, string $whenNull = ''): string
+    {
+        if ($value === null) {
+            return $whenNull;
+        }
+
+        return 'Rp '.(str_ends_with($value, '.00') ? self::gram(substr($value, 0, -3), 0) : self::gram($value, 2));
+    }
+
     public static function rupiah(?string $value, string $whenNull = ''): string
     {
         return $value === null ? $whenNull : 'Rp '.self::gram($value, 0);

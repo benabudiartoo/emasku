@@ -49,6 +49,8 @@ export default function ItemForm({ kind: initialKind, old = false, item, locatio
         purity_input: inputNumber(item?.purity_input ?? null),
         acquisition_method: item?.acquisition_method ?? (old ? 'opening_balance' : 'purchase'),
         acquisition_cost: inputNumber(item?.acquisition_cost ?? null),
+        purchase_store: item?.purchase_store ?? '',
+        resale_discount_percent: inputNumber(item?.resale_discount_percent ?? null),
         owned_since: item?.owned_since ?? '',
         owned_since_certainty: item?.owned_since_certainty ?? 'exact',
         owned_since_note: item?.owned_since_note ?? '',
@@ -174,6 +176,10 @@ export default function ItemForm({ kind: initialKind, old = false, item, locatio
                         <Field id="acquisition_method" label="Cara perolehan" error={err('acquisition_method')}>{select('acquisition_method', ACQUISITION_LABEL)}</Field>
                         <Field id="acquisition_cost" label="Harga perolehan (Rp, opsional)" error={err('acquisition_cost')}>{text('acquisition_cost', { inputMode: 'numeric', placeholder: 'Kosong = tidak diketahui' })}</Field>
                     </div>
+                    <Field id="purchase_store" label="Toko / tempat pembelian (opsional)" error={err('purchase_store')}>{text('purchase_store', { maxLength: 120, placeholder: 'Mis. Toko Emas Mulia Gold Palembang' })}</Field>
+                    <Field id="resale_discount_percent" label="Potongan jual (%, opsional)" error={err('resale_discount_percent')} hint="Perkiraan potongan toko bila barang ini dijual. Dipakai untuk memperkirakan harga jual.">
+                        {text('resale_discount_percent', { inputMode: 'decimal', placeholder: 'Mis. 10 atau 15' })}
+                    </Field>
                     <div className="grid gap-4 sm:grid-cols-2">
                         <Field id="owned_since" label="Dimiliki sejak" error={err('owned_since')} hint="Berbeda dari tanggal Anda mencatat di aplikasi ini.">
                             {text('owned_since', { type: 'date', max: new Date().toISOString().slice(0, 10) })}

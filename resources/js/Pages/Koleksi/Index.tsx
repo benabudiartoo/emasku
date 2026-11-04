@@ -8,9 +8,9 @@ import AppLayout from '@/Layouts/AppLayout';
 import { gram, missingText, purityLabel } from '@/lib/format';
 import type { Item, Loc } from '@/types';
 
-type Filters = { jenis?: string; lokasi?: string; data?: string };
+type Filters = { jenis?: string; lokasi?: string; data?: string; toko?: string };
 
-export default function Index({ items, filters, locations, has_any }: { items: Item[]; filters: Filters; locations: Loc[]; has_any: boolean }) {
+export default function Index({ items, filters, locations, stores, has_any }: { items: Item[]; filters: Filters; locations: Loc[]; stores: string[]; has_any: boolean }) {
     const [pick, setPick] = useState(false);
 
     const setFilter = (key: keyof Filters, value: string) =>
@@ -32,14 +32,18 @@ export default function Index({ items, filters, locations, has_any }: { items: I
                     <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Koleksi Saya</h1>
                     <p className="mt-1 text-sm text-muted">Semua emas yang Anda catat dan di mana tersimpannya.</p>
                 </div>
-                <button type="button" onClick={() => setPick(true)} className="btn btn-primary hidden md:inline-flex"><Plus size={18} aria-hidden />Tambah</button>
+                <div className="flex shrink-0 items-center gap-2">
+                    <Link href="/koleksi/impor" className="btn btn-secondary">Impor Excel</Link>
+                    <button type="button" onClick={() => setPick(true)} className="btn btn-primary hidden md:inline-flex"><Plus size={18} aria-hidden />Tambah</button>
+                </div>
             </header>
 
             {has_any && (
-                <section aria-label="Filter" className="mt-6 grid gap-3 sm:grid-cols-3">
+                <section aria-label="Filter" className={`mt-6 grid gap-3 ${stores.length > 0 ? 'sm:grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-3'}`}>
                     {select('jenis', 'Jenis', [['', 'Semua jenis'], ['bar', 'Batangan'], ['jewelry', 'Perhiasan']])}
                     {select('lokasi', 'Lokasi', [['', 'Semua lokasi'], ...locations.map((l): [string, string] => [l.id, l.name])])}
                     {select('data', 'Status data', [['', 'Semua status'], ['lengkap', 'Lengkap'], ['kurang', 'Perlu dilengkapi']])}
+                    {stores.length > 0 && select('toko', 'Toko', [['', 'Semua toko'], ...stores.map((s): [string, string] => [s, s])])}
                 </section>
             )}
 
@@ -64,6 +68,7 @@ export default function Index({ items, filters, locations, has_any }: { items: I
                                         {item.kind === 'bar' ? `Batangan · ${purityLabel(item.purity_source, item.purity_input)} · ${item.pieces} keping` : `Perhiasan · ${purityLabel(item.purity_source, item.purity_input)}`}
                                     </span>
                                     <span className="mt-1 flex items-center gap-1 text-sm text-muted"><MapPin size={14} aria-hidden />{item.location?.name ?? 'Lokasi belum ditentukan'}</span>
+                                    {item.purchase_store && <span className="mt-0.5 block truncate text-xs text-muted" translate="no">Dibeli di {item.purchase_store}</span>}
                                     {item.ownership === 'held_for_others' && <span className="mt-1 block text-xs font-medium text-warn">Titipan{item.held_for ? ` · ${item.held_for}` : ''}, tidak dihitung</span>}
                                 </span>
                                 <span className="shrink-0 text-right">

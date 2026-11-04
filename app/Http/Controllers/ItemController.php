@@ -19,14 +19,14 @@ use Inertia\Response;
 class ItemController extends Controller
 {
     /** Numeric inputs may be typed with an Indonesian decimal comma. */
-    private const DECIMAL_FIELDS = ['unit_weight_g', 'gross_weight_g', 'stone_weight_g', 'net_weight_g', 'purity_input', 'acquisition_cost'];
+    private const DECIMAL_FIELDS = ['unit_weight_g', 'gross_weight_g', 'stone_weight_g', 'net_weight_g', 'purity_input', 'acquisition_cost', 'resale_discount_percent'];
 
     public function __construct(private GoldCalculator $calc) {}
 
     public function index(Request $request): Response
     {
         $userId = $request->user()->id;
-        $filters = $request->only(['jenis', 'lokasi', 'data']);
+        $filters = $request->only(['jenis', 'lokasi', 'data', 'toko']);
 
         $items = ItemPresenter::filtered($userId, $filters, $this->calc);
 
@@ -34,6 +34,7 @@ class ItemController extends Controller
             'items' => $items,
             'filters' => $filters,
             'locations' => $this->locations($userId),
+            'stores' => Item::where('user_id', $userId)->whereNotNull('purchase_store')->distinct()->orderBy('purchase_store')->pluck('purchase_store')->values(),
             'has_any' => Item::where('user_id', $userId)->exists(),
         ]);
     }
@@ -171,6 +172,8 @@ class ItemController extends Controller
             'purity_input' => ['nullable', 'numeric'],
             'acquisition_method' => ['required', 'in:purchase,gift,inheritance,opening_balance'],
             'acquisition_cost' => ['nullable', 'numeric', 'min:0', 'max:9999999999999999'],
+            'purchase_store' => ['nullable', 'string', 'max:120'],
+            'resale_discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'owned_since' => ['nullable', 'date', 'before_or_equal:today'],
             'owned_since_certainty' => ['required', Rule::in($dateCertainty)],
             'owned_since_note' => ['nullable', 'string', 'max:1000'],
@@ -226,7 +229,7 @@ class ItemController extends Controller
     {
         $attributes = collect($data)->only([
             'name', 'brand', 'location_id', 'ownership', 'held_for', 'purity_fraction', 'purity_source', 'purity_input',
-            'acquisition_method', 'acquisition_cost', 'owned_since', 'owned_since_certainty', 'owned_since_note',
+            'acquisition_method', 'acquisition_cost', 'purchase_store', 'resale_discount_percent', 'owned_since', 'owned_since_certainty', 'owned_since_note',
             'haul_start', 'haul_start_certainty', 'haul_start_note', 'notes',
         ])->all();
 

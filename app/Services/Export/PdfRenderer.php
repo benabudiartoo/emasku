@@ -19,7 +19,7 @@ class PdfRenderer
 
         $pdf = new Dompdf($options);
         $pdf->loadHtml(view('exports.report', ['report' => $report, 'printed' => now()->format('d-m-Y H:i')])->render());
-        $pdf->setPaper('A4', 'portrait');
+        $pdf->setPaper('A4', $report->landscape ? 'landscape' : 'portrait');
         $pdf->render();
 
         return (string) $pdf->output();

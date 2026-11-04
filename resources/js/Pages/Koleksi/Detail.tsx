@@ -4,8 +4,9 @@ import type { ReactNode } from 'react';
 import { WarningCircle } from '@phosphor-icons/react';
 import Modal from '@/Components/Modal';
 import Secret from '@/Components/Secret';
+import ResaleBlock from './ResaleBlock';
 import AppLayout from '@/Layouts/AppLayout';
-import { ACQUISITION_LABEL, DATE_CERTAINTY, KIND_LABEL, dateId, gram, missingText, purityLabel, rupiah } from '@/lib/format';
+import { ACQUISITION_LABEL, DATE_CERTAINTY, KIND_LABEL, dateId, gram, missingText, purityLabel, rupiah, rupiahCents } from '@/lib/format';
 import type { Item } from '@/types';
 
 type Photo = { id: string; name: string; url: string };
@@ -39,6 +40,9 @@ export default function Detail({ item, photos }: { item: Item; photos: Photo[] }
         ['Lokasi', item.location?.name ?? 'Belum ditentukan'],
         ['Cara perolehan', ACQUISITION_LABEL[item.acquisition_method] ?? item.acquisition_method],
         ['Harga perolehan', item.acquisition_cost === null ? 'Tidak diketahui' : <Secret>{rupiah(item.acquisition_cost)}</Secret>],
+        ['Harga per gram', item.price_per_gram === null ? 'Belum bisa dihitung' : <Secret>{rupiahCents(item.price_per_gram)}</Secret>],
+        ['Toko / tempat pembelian', item.purchase_store ?? 'Belum diisi'],
+        ['Potongan jual', item.resale_discount_percent === null ? 'Belum diisi' : `${gram(item.resale_discount_percent, 0)}%`],
         ['Dimiliki sejak', item.owned_since ? `${dateId(item.owned_since)} (${DATE_CERTAINTY[item.owned_since_certainty]?.toLowerCase()})` : 'Tidak diketahui'],
         ...(item.owned_since_note ? ([['Catatan tanggal', item.owned_since_note]] as [string, ReactNode][]) : []),
         ...(item.haul_start ? ([['Awal haul', `${dateId(item.haul_start)} (${DATE_CERTAINTY[item.haul_start_certainty ?? 'exact']?.toLowerCase()})`]] as [string, ReactNode][]) : []),
@@ -90,6 +94,8 @@ export default function Detail({ item, photos }: { item: Item; photos: Photo[] }
                     ))}
                 </dl>
             </section>
+
+            <ResaleBlock item={item} />
 
             {item.kind === 'bar' && item.units.some((u) => u.serial_number) && (
                 <section aria-label="Nomor seri" className="panel mt-5 p-4">

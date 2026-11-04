@@ -1,6 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
-import { ArrowRight, HourglassMedium, PlusCircle } from '@phosphor-icons/react';
+import { ArrowRight, FileXls, HourglassMedium, PlusCircle } from '@phosphor-icons/react';
 import PilihJenisModal from '@/Components/PilihJenisModal';
 import AppLayout from '@/Layouts/AppLayout';
 
@@ -28,6 +28,12 @@ export default function Mulai() {
                     <span className="block text-lg font-semibold">Catat koleksi lama</span>
                     <span className="block text-sm leading-relaxed text-muted">Untuk emas warisan atau yang dibeli sudah lama, dengan tanggal dan tingkat kepastian.</span>
                     <span className="mt-auto inline-flex items-center gap-1 text-sm font-semibold text-brand-dark">Lanjut<ArrowRight size={16} aria-hidden /></span>
+                </Link>
+                <Link href="/koleksi/impor" className={CARD}>
+                    <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-soft text-brand-dark"><FileXls size={26} aria-hidden /></span>
+                    <span className="block text-lg font-semibold">Impor dari Excel</span>
+                    <span className="block text-sm leading-relaxed text-muted">Sudah punya daftar perhiasan di Excel? Pindahkan sekaligus, dengan pratinjau dulu.</span>
+                    <span className="mt-auto inline-flex items-center gap-1 text-sm font-semibold text-brand-dark">Pilih berkas<ArrowRight size={16} aria-hidden /></span>
                 </Link>
             </section>
             <p className="mt-6 text-center">

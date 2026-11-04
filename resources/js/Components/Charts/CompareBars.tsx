@@ -7,10 +7,10 @@ type Bar = { label: string; value: string; color: string };
  * Two bars on one rupiah scale: what was paid and what the same items are worth now. Two series, so a legend names
  * them; the value sits on each bar's line. Both bars start at zero so the lengths compare honestly.
  */
-export default function CompareBars({ cost, value, format, children }: { cost: string; value: string; format: (v: string) => string; children?: ReactNode }) {
+export default function CompareBars({ cost, value, format, valueLabel = 'Nilai sekarang', children }: { cost: string; value: string; format: (v: string) => string; valueLabel?: string; children?: ReactNode }) {
     const bars: Bar[] = [
         { label: 'Harga perolehan', value: cost, color: SERIES_GOLD },
-        { label: 'Nilai sekarang', value, color: SERIES_GREEN },
+        { label: valueLabel, value, color: SERIES_GREEN },
     ];
     const max = Math.max(...bars.map((b) => Number(b.value)), 0);
 
@@ -37,7 +37,7 @@ export default function CompareBars({ cost, value, format, children }: { cost: s
                 ))}
             </ul>
             {children}
-            <TableView caption="Nilai sekarang dan harga perolehan" head={['Ukuran', 'Rupiah']} rows={bars.map((b) => [b.label, format(b.value)])} />
+            <TableView caption={`${valueLabel} dan harga perolehan`} head={['Ukuran', 'Rupiah']} rows={bars.map((b) => [b.label, format(b.value)])} />
         </div>
     );
 }
