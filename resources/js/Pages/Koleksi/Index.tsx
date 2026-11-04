@@ -5,7 +5,7 @@ import ExportButtons from '@/Components/ExportButtons';
 import PilihJenisModal from '@/Components/PilihJenisModal';
 import Secret from '@/Components/Secret';
 import AppLayout from '@/Layouts/AppLayout';
-import { gram, missingText, purityLabel } from '@/lib/format';
+import { gram, missingText, purityLabel, rupiahCents } from '@/lib/format';
 import type { Item, Loc } from '@/types';
 
 type Filters = { jenis?: string; lokasi?: string; data?: string; toko?: string };
@@ -69,6 +69,7 @@ export default function Index({ items, filters, locations, stores, has_any }: { 
                                     </span>
                                     <span className="mt-1 flex items-center gap-1 text-sm text-muted"><MapPin size={14} aria-hidden />{item.location?.name ?? 'Lokasi belum ditentukan'}</span>
                                     {item.purchase_store && <span className="mt-0.5 block truncate text-xs text-muted" translate="no">Dibeli di {item.purchase_store}</span>}
+                                    <span className="mt-0.5 block text-xs text-muted">{item.acquisition_cost === null ? 'Harga beli belum diisi' : <>Harga beli <span className="font-medium text-ink"><Secret>{rupiahCents(item.acquisition_cost)}</Secret></span></>}</span>
                                     {item.ownership === 'held_for_others' && <span className="mt-1 block text-xs font-medium text-warn">Titipan{item.held_for ? ` · ${item.held_for}` : ''}, tidak dihitung</span>}
                                 </span>
                                 <span className="shrink-0 text-right">

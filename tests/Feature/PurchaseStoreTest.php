@@ -120,6 +120,18 @@ class PurchaseStoreTest extends TestCase
             ->has('items', 1)->where('items.0.name', 'Di Mulia')->where('filters.toko', 'Mulia'));
     }
 
+    public function test_the_collection_list_carries_the_purchase_price_of_each_item_and_null_when_unknown(): void
+    {
+        $this->bars($this->user, '10.0000', 1, null, ['name' => 'Dengan harga', 'acquisition_cost' => '4895000.00']);
+        $this->bars($this->user, '10.0000', 1, null, ['name' => 'Tanpa harga', 'acquisition_cost' => null]);
+
+        $this->get('/koleksi')->assertInertia(fn (Assert $p) => $p->where('items', function ($items) {
+            $by = collect($items)->keyBy('name');
+
+            return $by['Dengan harga']['acquisition_cost'] === '4895000.00' && $by['Tanpa harga']['acquisition_cost'] === null;
+        }));
+    }
+
     public function test_the_export_has_the_store_columns_and_a_per_store_summary(): void
     {
         $this->bars($this->user, '10.0000', 1, null, ['name' => 'A', 'purchase_store' => 'Signature CCM', 'acquisition_cost' => '7000000', 'resale_discount_percent' => '10']);
